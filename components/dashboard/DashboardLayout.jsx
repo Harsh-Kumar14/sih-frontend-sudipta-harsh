@@ -186,7 +186,11 @@ export default function DashboardLayout({
             </div>
             <div>
               <p className="font-medium text-foreground">
-                {!isUserLoaded ? 'Loading...' : (currentUser?.name || 'Guest User')}
+                {!isUserLoaded
+                  ? 'Loading...'
+                  : userType === 'doctor' && currentUser?.name
+                    ? `Dr. ${currentUser.name}`
+                    : (currentUser?.name || 'Guest User')}
               </p>
               <p className="text-sm text-muted-foreground capitalize">{userType}</p>
             </div>

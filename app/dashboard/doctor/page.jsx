@@ -15,30 +15,41 @@ export default function DoctorDashboard() {
   useEffect(() => {
     // Check authentication
     const userType = localStorage.getItem("userType")
-    const userId = localStorage.getItem("userId")
-
-    if (!userType || userType !== "doctor") {
+    const doctorId = localStorage.getItem("doctorId")
+    if (!userType || userType !== "doctor" || !doctorId) {
       router.push("/login?type=doctor")
       return
     }
 
-    // Mock doctor data
-    setUser({
-      id: userId,
-      name: "Dr. Sarah Johnson",
-      specialization: "Cardiology",
-      licenseNumber: "DOC123",
-      email: "sarah.johnson@hospital.com",
-      phone: "+1 (555) 987-6543",
-      experience: "15 years",
-      hospital: "New York Medical Center",
-    })
+    // Try to get doctor details from localStorage (set after login)
+    const doctorData = localStorage.getItem("doctorData")
+    if (doctorData) {
+      try {
+        const parsed = JSON.parse(doctorData)
+        setUser(parsed)
+        return
+      } catch (e) {
+        // fallback to fetch
+      }
+    }
+
+    // Fallback: fetch doctor details from backend
+    fetch(`http://localhost:8080/doctor/${doctorId}`)
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data && data.doctor) {
+          setUser(data.doctor)
+          localStorage.setItem("doctorData", JSON.stringify(data.doctor))
+        }
+      })
+      .catch(() => {})
   }, [router])
 
   const handleLogout = () => {
     localStorage.removeItem("userType")
     localStorage.removeItem("userId")
     localStorage.removeItem("doctorId")
+    localStorage.removeItem("doctorData")
     router.push("/")
   }
 
