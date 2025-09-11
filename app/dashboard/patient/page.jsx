@@ -8,6 +8,8 @@ import VideoSection from "../../../components/patient/VideoSection"
 import MedicineSection from "../../../components/patient/MedicineSection"
 import PatientOverview from "../../../components/patient/PatientOverview"
 import AISymptomChecker from "../../../components/patient/AISymptomChecker"
+import Prescription from "../../../components/patient/Prescription"
+import Notification from "../../../components/patient/Notification"
 
 export default function PatientDashboard() {
   const [activeSection, setActiveSection] = useState("overview")
@@ -58,6 +60,7 @@ export default function PatientDashboard() {
     { id: "doctors", label: "Find Doctors", icon: "doctor" },
     { id: "video", label: "Video Calls", icon: "video" },
     { id: "medicines", label: "Medicines", icon: "pill" },
+    { id: "prescriptions", label: "Prescriptions", icon: "file-text" },
   ]
 
   const renderContent = () => {
@@ -72,6 +75,8 @@ export default function PatientDashboard() {
         return <VideoSection />
       case "medicines":
         return <MedicineSection />
+      case "prescriptions":
+        return <Prescription />
       default:
         return <PatientOverview user={user} />
     }
@@ -85,6 +90,8 @@ export default function PatientDashboard() {
       activeSection={activeSection}
       onSectionChange={setActiveSection}
       onLogout={handleLogout}
+      // Pass the Notification component to DashboardLayout
+      notificationComponent={<Notification />}
     >
       {renderContent()}
     </DashboardLayout>

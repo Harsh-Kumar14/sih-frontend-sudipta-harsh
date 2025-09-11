@@ -2,7 +2,10 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
-
+import PatientProfileSection from "../patient/profileSection"
+import DoctorProfileSection from "../doctor/profileSection"
+import HospitalProfileSection from "../hospital/profileSection"
+import PharmacyProfileSection from "../pharmacy/ProfileSection"
 export default function DashboardLayout({
   user,
   userType,
@@ -10,142 +13,111 @@ export default function DashboardLayout({
   activeSection,
   onSectionChange,
   onLogout,
+  notificationComponent,
   children,
 }) {
   const [currentUser, setCurrentUser] = useState(user)
   const [isUserLoaded, setIsUserLoaded] = useState(false)
+  const [showProfileModal, setShowProfileModal] = useState(false)
 
   useEffect(() => {
-    // Update the user when the user prop changes (after login)
     if (user) {
       setCurrentUser(user)
       setIsUserLoaded(true)
     } else {
-      // If no user is provided, check localStorage for persisted user data
       try {
-        const storedUser = localStorage.getItem('currentUser')
+        const storedUser = localStorage.getItem("currentUser")
         if (storedUser) {
           const parsedUser = JSON.parse(storedUser)
           setCurrentUser(parsedUser)
           setIsUserLoaded(true)
         }
       } catch (error) {
-        console.error('Error parsing stored user data:', error)
+        console.error("Error parsing stored user data:", error)
       }
     }
   }, [user])
 
-  // Save user to localStorage when it changes
   useEffect(() => {
     if (currentUser && isUserLoaded) {
       try {
-        localStorage.setItem('currentUser', JSON.stringify(currentUser))
+        localStorage.setItem("currentUser", JSON.stringify(currentUser))
       } catch (error) {
-        console.error('Error saving user data to localStorage:', error)
+        console.error("Error saving user data to localStorage:", error)
       }
     }
   }, [currentUser, isUserLoaded])
 
   const handleLogout = () => {
-    // Clear user data from state and localStorage
     setCurrentUser(null)
     setIsUserLoaded(false)
     try {
-      localStorage.removeItem('currentUser')
+      localStorage.removeItem("currentUser")
     } catch (error) {
-      console.error('Error clearing user data from localStorage:', error)
+      console.error("Error clearing user data from localStorage:", error)
     }
-    // Call the original logout handler
-    if (onLogout) {
-      onLogout()
-    }
+    if (onLogout) onLogout()
   }
 
   const getIcon = (iconName) => {
-    const icons = {
-      home: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-          />
-        </svg>
-      ),
-      doctor: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-          />
-        </svg>
-      ),
-      video: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-          />
-        </svg>
-      ),
-      pill: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
-          />
-        </svg>
-      ),
-      queue: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
-          />
-        </svg>
-      ),
-      schedule: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-          />
-        </svg>
-      ),
-      inventory: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-          />
-        </svg>
-      ),
-      location: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-          />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
-      ),
+    switch (iconName) {
+      case "overview":
+        return (
+          <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l9-9 9 9v8a2 2 0 01-2 2h-4a2 2 0 01-2-2v-4a2 2 0 00-2-2H7a2 2 0 00-2 2v4a2 2 0 01-2 2H3z" />
+          </svg>
+        )
+      case "patient-queue":
+        return (
+          <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <circle cx="8" cy="8" r="3" stroke="currentColor" strokeWidth={2} />
+            <circle cx="16" cy="8" r="3" stroke="currentColor" strokeWidth={2} />
+            <circle cx="12" cy="16" r="3" stroke="currentColor" strokeWidth={2} />
+          </svg>
+        )
+      case "schedule":
+        return (
+          <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <rect x="3" y="7" width="18" height="14" rx="2" stroke="currentColor" strokeWidth={2} />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 3v4M8 3v4M3 11h18" />
+          </svg>
+        )
+      case "brain":
+        return (
+          <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4a8 8 0 018 8v1a4 4 0 01-4 4H8a4 4 0 01-4-4v-1a8 8 0 018-8z" />
+          </svg>
+        )
+      case "doctor":
+        return (
+          <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth={2} />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" />
+          </svg>
+        )
+      case "video":
+        return (
+          <svg className="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <rect x="3" y="7" width="15" height="10" rx="2" stroke="currentColor" strokeWidth={2} />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 7v10l-5-5z" />
+          </svg>
+        )
+      case "pill":
+        return (
+          <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <rect x="7" y="7" width="10" height="10" rx="5" stroke="currentColor" strokeWidth={2} />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7l10 10" />
+          </svg>
+        )
+      case "file-text":
+        return (
+          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        )
+      default:
+        return null
     }
-    return icons[iconName] || icons.home
   }
 
   const getUserTypeColor = () => {
@@ -158,6 +130,23 @@ export default function DashboardLayout({
         return "text-accent"
       default:
         return "text-primary"
+    }
+  }
+
+  // Function to render the correct ProfileSection based on userType
+  const renderProfileSection = () => {
+    if (userType === "doctor") {
+      return <DoctorProfileSection initialProfile={currentUser} />
+    } 
+    else if (userType === "hospital"){
+      return <HospitalProfileSection initialProfile={currentUser} />
+    }
+    else if (userType === "pharmacy"){
+      return <PharmacyProfileSection initialProfile={currentUser} />
+    }
+    
+    else {
+      return <PatientProfileSection initialProfile={currentUser} />
     }
   }
 
@@ -181,14 +170,24 @@ export default function DashboardLayout({
               {!isUserLoaded ? (
                 <div className="w-4 h-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
               ) : (
-                currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : 'U'
+                currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : "U"
               )}
             </div>
-            <div>
-              <p className="font-medium text-foreground">
-                {!isUserLoaded ? 'Loading...' : (currentUser?.name || 'Guest User')}
-              </p>
-              <p className="text-sm text-muted-foreground capitalize">{userType}</p>
+            {/* Visually appealing name + edit section */}
+            <div className="flex items-center space-x-2 bg-gray-50 px-3 py-2 rounded-lg shadow-sm">
+              <span className="font-semibold text-blue-700 text-lg tracking-wide">
+                {!isUserLoaded ? "Loading..." : currentUser?.name || "Guest User"}
+              </span>
+              <button
+                type="button"
+                className="p-2 rounded-full bg-blue-100 hover:bg-blue-200 transition-colors focus:outline-none flex items-center justify-center"
+                title="Edit Profile"
+                onClick={() => setShowProfileModal(true)}
+              >
+                <svg className="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-2.828 0L9 13z" />
+                </svg>
+              </button>
             </div>
           </div>
         </div>
@@ -221,12 +220,7 @@ export default function DashboardLayout({
             className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-              />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4M21 12H7" />
             </svg>
             <span>Logout</span>
           </button>
@@ -235,19 +229,15 @@ export default function DashboardLayout({
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        {/* Header */}
+        {/* Header with notifications */}
         <header className="bg-card border-b border-border px-6 py-4">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-semibold text-foreground capitalize">
               {navigationItems.find((item) => item.id === activeSection)?.label || "Dashboard"}
             </h1>
-            <div className="text-sm text-muted-foreground">
-              {new Date().toLocaleDateString("en-US", {
-                weekday: "long",
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
+            <div className="flex items-center gap-x-4 lg:gap-x-6">
+              {/* Notification Component */}
+              {notificationComponent && <div className="flex items-center">{notificationComponent}</div>}
             </div>
           </div>
         </header>
@@ -255,6 +245,24 @@ export default function DashboardLayout({
         {/* Content */}
         <main className="flex-1 p-6">{children}</main>
       </div>
+
+      {/* Profile Modal */}
+      {showProfileModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm">
+          <div className="bg-white rounded-lg shadow-lg max-w-lg w-full p-6 relative">
+            <button
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+              onClick={() => setShowProfileModal(false)}
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            {/* Use the function to render correct profile section */}
+            {renderProfileSection()}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
