@@ -1,6 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+
+// API base URL for the pharmacy backend
+const API_BASE_URL = 'http://localhost:8000/api/medicines'
 
 export default function InventoryManagement() {
   const [searchTerm, setSearchTerm] = useState("")
@@ -10,86 +13,126 @@ export default function InventoryManagement() {
   const [showEditModal, setShowEditModal] = useState(false)
   const [editingMedicine, setEditingMedicine] = useState(null)
   const [isButtonLoading, setIsButtonLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const [addFormData, setAddFormData] = useState({
     name: "",
     currentStock: "",
     diseases: "",
     expiryDate: "",
     price: "",
+    supplier: "",
     lastRestocked: ""
   })
   const [editFormData, setEditFormData] = useState({})
   const [errors, setErrors] = useState({})
 
-  const [inventory, setInventory] = useState([
-    {
-      id: 1,
-      name: "Lisinopril 10mg",
-      category: "Cardiovascular",
-      currentStock: 150,
-      minStock: 50,
-      maxStock: 200,
-      price: 15.99,
-      supplier: "PharmaCorp",
-      expiryDate: "2025-06-15",
-      batchNumber: "LC001",
-      lastRestocked: "2024-01-10",
-    },
-    {
-      id: 2,
-      name: "Metformin 500mg",
-      category: "Diabetes",
-      currentStock: 89,
-      minStock: 40,
-      maxStock: 150,
-      price: 12.5,
-      supplier: "MediSupply",
-      expiryDate: "2025-03-20",
-      batchNumber: "MF002",
-      lastRestocked: "2024-01-08",
-    },
-    {
-      id: 3,
-      name: "Amoxicillin 500mg",
-      category: "Antibiotics",
-      currentStock: 15,
-      minStock: 50,
-      maxStock: 100,
-      price: 18.75,
-      supplier: "PharmaCorp",
-      expiryDate: "2024-12-30",
-      batchNumber: "AM003",
-      lastRestocked: "2023-12-15",
-    },
-    {
-      id: 4,
-      name: "Ibuprofen 200mg",
-      category: "Pain Relief",
-      currentStock: 200,
-      minStock: 75,
-      maxStock: 250,
-      price: 8.99,
-      supplier: "HealthDist",
-      expiryDate: "2026-01-10",
-      batchNumber: "IB004",
-      lastRestocked: "2024-01-12",
-    },
-    {
-      id: 5,
-      name: "Insulin Glargine",
-      category: "Diabetes",
-      currentStock: 8,
-      minStock: 25,
-      maxStock: 50,
-      price: 89.99,
-      supplier: "DiabetesCare",
-      expiryDate: "2024-08-15",
-      batchNumber: "IG005",
-      lastRestocked: "2023-11-20",
-    },
-  ])
+  const [inventory, setInventory] = useState([])
 
-  const categories = ["all", "Cardiovascular", "Diabetes", "Antibiotics", "Pain Relief"]
+  // API Functions
+  const fetchMedicines = async () => {
+    try {
+      setIsLoading(true)
+      const response = await fetch(API_BASE_URL)
+      const result = await response.json()
+      
+      if (result.success && result.data) {
+        // Transform backend data to match frontend format
+        const transformedData = result.data.map((medicine, index) => ({
+          id: medicine._id || index + 1,
+          name: medicine.Medicinename,
+          category: medicine.disease?.[0] || "General", // Use first disease as category
+          currentStock: medicine.currentstock,
+          minStock: 50, // Default values since not in backend model
+          maxStock: 200,
+          price: medicine.price,
+          supplier: medicine.supplier,
+          expiryDate: new Date(medicine.expirydate).toISOString().split('T')[0],
+          batchNumber: `BATCH-${index + 1}`, // Generated since not in backend
+          lastRestocked: new Date(medicine.lastrestock).toISOString().split('T')[0],
+          diseases: medicine.disease || []
+        }))
+        setInventory(transformedData)
+      }
+    } catch (error) {
+      console.error('Error fetching medicines:', error)
+      // Keep empty array on error
+      setInventory([])
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const addMedicineToBackend = async (medicineData) => {
+    try {
+      const backendData = {
+        Medicinename: medicineData.name,
+        currentstock: parseInt(medicineData.currentStock),
+        disease: medicineData.diseases.split(',').map(d => d.trim()),
+        expirydate: new Date(medicineData.expiryDate),
+        price: parseFloat(medicineData.price),
+        supplier: medicineData.supplier,
+        lastrestock: new Date(medicineData.lastRestocked),
+        users: [] // Empty array as default
+      }
+
+      const response = await fetch(`${API_BASE_URL}/add`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(backendData)
+      })
+
+      const result = await response.json()
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to add medicine')
+      }
+      return result.data
+    } catch (error) {
+      console.error('Error adding medicine:', error)
+      throw error
+    }
+  }
+
+  const updateMedicineInBackend = async (originalName, medicineData) => {
+    try {
+      const backendData = {
+        Medicinename: medicineData.name,
+        currentstock: parseInt(medicineData.currentStock),
+        disease: medicineData.diseases.split(',').map(d => d.trim()),
+        expirydate: new Date(medicineData.expiryDate),
+        price: parseFloat(medicineData.price),
+        supplier: medicineData.supplier,
+        lastrestock: new Date(medicineData.lastRestocked),
+        users: [] // Keep existing or empty array
+      }
+
+      const response = await fetch(`${API_BASE_URL}/${encodeURIComponent(originalName)}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(backendData)
+      })
+
+      const result = await response.json()
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to update medicine')
+      }
+      return result.data
+    } catch (error) {
+      console.error('Error updating medicine:', error)
+      throw error
+    }
+  }
+
+  // Fetch medicines on component mount
+  useEffect(() => {
+    fetchMedicines()
+  }, [])
+
+  // Dynamic categories based on fetched medicines
+  const categories = ["all", ...new Set(inventory.map(item => item.category).filter(Boolean))]
 
   const getStockStatus = (item) => {
     if (item.currentStock <= item.minStock) return "low"
@@ -147,6 +190,7 @@ export default function InventoryManagement() {
       diseases: Array.isArray(medicine.diseases) ? medicine.diseases.join(', ') : (medicine.diseases || ''),
       expiryDate: medicine.expiryDate,
       price: medicine.price.toString(),
+      supplier: medicine.supplier || '',
       lastRestocked: medicine.lastRestocked
     })
     setShowEditModal(true)
@@ -159,6 +203,7 @@ export default function InventoryManagement() {
     if (!addFormData.diseases.trim()) newErrors.diseases = "Diseases field is required"
     if (!addFormData.expiryDate) newErrors.expiryDate = "Expiry date is required"
     if (!addFormData.price || addFormData.price <= 0) newErrors.price = "Price must be greater than 0"
+    if (!addFormData.supplier.trim()) newErrors.supplier = "Supplier is required"
     if (!addFormData.lastRestocked) newErrors.lastRestocked = "Last restocked date is required"
     
     setErrors(newErrors)
@@ -172,13 +217,14 @@ export default function InventoryManagement() {
     if (!editFormData.diseases?.trim()) newErrors.diseases = "Diseases field is required"
     if (!editFormData.expiryDate) newErrors.expiryDate = "Expiry date is required"
     if (!editFormData.price || editFormData.price <= 0) newErrors.price = "Price must be greater than 0"
+    if (!editFormData.supplier?.trim()) newErrors.supplier = "Supplier is required"
     if (!editFormData.lastRestocked) newErrors.lastRestocked = "Last restocked date is required"
     
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
-  const handleAddMedicine = (e) => {
+  const handleAddMedicine = async (e) => {
     e.preventDefault()
     
     if (!validateForm()) {
@@ -187,39 +233,38 @@ export default function InventoryManagement() {
 
     setIsButtonLoading(true)
 
-    // Simulate API call
-    setTimeout(() => {
-      const newMedicine = {
-        id: Date.now(),
-        name: addFormData.name,
-        category: "General", // You can add category selection later
-        currentStock: parseInt(addFormData.currentStock),
-        minStock: 20, // Default values
-        maxStock: 100,
-        price: parseFloat(addFormData.price),
-        supplier: "New Supplier", // Default value
-        expiryDate: addFormData.expiryDate,
-        batchNumber: `MED${Date.now()}`,
-        lastRestocked: addFormData.lastRestocked,
-        diseases: addFormData.diseases.split(',').map(d => d.trim())
-      }
-
-      setInventory(prev => [newMedicine, ...prev])
+    try {
+      await addMedicineToBackend(addFormData)
+      
+      // Refresh the medicines list from backend
+      await fetchMedicines()
+      
+      // Reset form and close modal
       setAddFormData({
         name: "",
         currentStock: "",
         diseases: "",
         expiryDate: "",
         price: "",
+        supplier: "",
         lastRestocked: ""
       })
       setErrors({})
       setShowAddModal(false)
+      
+      // Show success message (you can add a toast notification here)
+      console.log('Medicine added successfully!')
+      
+    } catch (error) {
+      console.error('Failed to add medicine:', error)
+      // You can add error handling UI here
+      setErrors({ submit: 'Failed to add medicine. Please try again.' })
+    } finally {
       setIsButtonLoading(false)
-    }, 1000)
+    }
   }
 
-  const handleUpdateMedicine = (e) => {
+  const handleUpdateMedicine = async (e) => {
     e.preventDefault()
     
     if (!validateEditForm()) {
@@ -228,29 +273,29 @@ export default function InventoryManagement() {
 
     setIsButtonLoading(true)
 
-    // Simulate API call
-    setTimeout(() => {
-      const updatedMedicine = {
-        ...editingMedicine,
-        name: editFormData.name,
-        currentStock: parseInt(editFormData.currentStock),
-        price: parseFloat(editFormData.price),
-        expiryDate: editFormData.expiryDate,
-        lastRestocked: editFormData.lastRestocked,
-        diseases: editFormData.diseases.split(',').map(d => d.trim()),
-        dateUpdated: new Date().toISOString()
-      }
-
-      setInventory(prev => prev.map(item => 
-        item.id === editingMedicine.id ? updatedMedicine : item
-      ))
+    try {
+      const originalName = editingMedicine.name
+      await updateMedicineInBackend(originalName, editFormData)
       
+      // Refresh the medicines list from backend
+      await fetchMedicines()
+      
+      // Reset form and close modal
       setEditFormData({})
       setErrors({})
       setShowEditModal(false)
       setEditingMedicine(null)
+      
+      // Show success message (you can add a toast notification here)
+      console.log('Medicine updated successfully!')
+      
+    } catch (error) {
+      console.error('Failed to update medicine:', error)
+      // You can add error handling UI here
+      setErrors({ submit: 'Failed to update medicine. Please try again.' })
+    } finally {
       setIsButtonLoading(false)
-    }, 1000)
+    }
   }
 
   const handleCloseModal = () => {
@@ -263,6 +308,7 @@ export default function InventoryManagement() {
       diseases: "",
       expiryDate: "",
       price: "",
+      supplier: "",
       lastRestocked: ""
     })
     setEditFormData({})
@@ -280,6 +326,16 @@ export default function InventoryManagement() {
 
   return (
     <div className="space-y-6">
+      {/* Loading State */}
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading medicines...</p>
+          </div>
+        </div>
+      ) : (
+        <>
       {/* Inventory Stats */}
       <div className="grid md:grid-cols-4 gap-6">
         <div className="bg-card border border-border rounded-lg p-6">
@@ -584,6 +640,25 @@ export default function InventoryManagement() {
                   {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price}</p>}
                 </div>
 
+                {/* Supplier */}
+                <div>
+                  <label htmlFor="add-supplier" className="block text-sm font-medium text-foreground mb-1">
+                    Supplier *
+                  </label>
+                  <input
+                    type="text"
+                    id="add-supplier"
+                    name="supplier"
+                    value={addFormData.supplier}
+                    onChange={handleInputChange}
+                    className={`w-full px-3 py-2 border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary ${
+                      errors.supplier ? 'border-red-500' : 'border-border'
+                    }`}
+                    placeholder="e.g., PharmaCorp"
+                  />
+                  {errors.supplier && <p className="text-red-500 text-sm mt-1">{errors.supplier}</p>}
+                </div>
+
                 {/* Expiry Date */}
                 <div>
                   <label htmlFor="add-expiry" className="block text-sm font-medium text-foreground mb-1">
@@ -748,6 +823,25 @@ export default function InventoryManagement() {
                   {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price}</p>}
                 </div>
 
+                {/* Supplier */}
+                <div>
+                  <label htmlFor="edit-supplier" className="block text-sm font-medium text-foreground mb-1">
+                    Supplier *
+                  </label>
+                  <input
+                    type="text"
+                    id="edit-supplier"
+                    name="supplier"
+                    value={editFormData.supplier || ''}
+                    onChange={handleEditInputChange}
+                    className={`w-full px-3 py-2 border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary ${
+                      errors.supplier ? 'border-red-500' : 'border-border'
+                    }`}
+                    placeholder="e.g., PharmaCorp"
+                  />
+                  {errors.supplier && <p className="text-red-500 text-sm mt-1">{errors.supplier}</p>}
+                </div>
+
                 {/* Expiry Date */}
                 <div>
                   <label htmlFor="edit-expiry" className="block text-sm font-medium text-foreground mb-1">
@@ -832,6 +926,8 @@ export default function InventoryManagement() {
             </form>
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   )

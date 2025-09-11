@@ -240,7 +240,7 @@ export default function PatientQueue() {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmitPrescription = (e) => {
+  const handleSubmitPrescription = async (e) => {
     e.preventDefault()
     
     if (!validatePrescriptionForm()) {
@@ -249,22 +249,67 @@ export default function PatientQueue() {
 
     setIsButtonLoading(true)
 
-    // Simulate API call
-    setTimeout(() => {
-      const prescriptions = prescriptionFormData.medicines.map((medicine, index) => ({
-        id: Date.now() + index,
-        patientId: prescriptionPatient.id,
-        patientName: prescriptionPatient.name,
+    try {
+      const doctorId = localStorage.getItem("doctorId")
+      
+      if (!doctorId) {
+        throw new Error("No doctor ID found. Please login again.")
+      }
+
+      // First, get the patient ID by contact number
+      let patientId = prescriptionPatient.patientId
+      
+      if (!patientId && prescriptionPatient.phone) {
+        try {
+          const patientResponse = await fetch('http://localhost:8080/patientId', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              contactNumber: prescriptionPatient.phone
+            })
+          })
+          
+          if (patientResponse.ok) {
+            const patientData = await patientResponse.json()
+            patientId = patientData.patientId
+          }
+        } catch (error) {
+          console.warn('Could not fetch patient ID:', error)
+        }
+      }
+
+      if (!patientId) {
+        throw new Error("Patient ID not found. Cannot prescribe medicines.")
+      }
+
+      // Prepare medicines array for the backend
+      const medicines = prescriptionFormData.medicines.map(medicine => ({
         medicineName: medicine.medicineName,
-        dosage: medicine.dosage,
-        timingOfTaking: medicine.timingOfTaking,
-        instructions: medicine.instructions,
-        prescribedBy: "Dr. Current Doctor", // You can get this from auth context
-        prescribedDate: new Date().toISOString(),
+        dose: `${medicine.dosage} - ${medicine.timingOfTaking}`,
+        doctorId: doctorId,
+        instructions: medicine.instructions || `${medicine.dosage}, ${medicine.timingOfTaking}`
       }))
 
-      // Here you would typically save to database
-      console.log('Prescriptions created:', prescriptions)
+      // Send prescription to backend
+      const response = await fetch(`http://localhost:8080/prescribe-multiple-medicines/${patientId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          medicines: medicines
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to prescribe medicines')
+      }
+
+      console.log('Prescriptions saved successfully:', result)
       
       // Reset form and close modal
       setPrescriptionFormData({
@@ -281,10 +326,18 @@ export default function PatientQueue() {
       setPrescriptionErrors({})
       setShowPrescriptionModal(false)
       setPrescriptionPatient(null)
-      setIsButtonLoading(false)
       
-      alert(`${prescriptionFormData.medicines.length} prescription(s) for ${prescriptionPatient.name} have been saved successfully!`)
-    }, 1000)
+      alert(`${medicines.length} prescription(s) for ${prescriptionPatient.name} have been saved successfully!`)
+      
+    } catch (error) {
+      console.error('Error prescribing medicines:', error)
+      setPrescriptionErrors({ 
+        submit: error.message || 'Failed to prescribe medicines. Please try again.' 
+      })
+      alert(`Error: ${error.message || 'Failed to prescribe medicines. Please try again.'}`)
+    } finally {
+      setIsButtonLoading(false)
+    }
   }
 
   const handleClosePrescriptionModal = () => {
@@ -909,6 +962,13 @@ export default function PatientQueue() {
                   Add Another Medicine
                 </button>
               </div>
+
+              {/* Error Display */}
+              {prescriptionErrors.submit && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                  <p className="text-sm">{prescriptionErrors.submit}</p>
+                </div>
+              )}
 
               {/* Form Actions */}
               <div className="flex justify-end gap-3 pt-4 border-t border-border">
