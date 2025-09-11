@@ -1,3 +1,5 @@
+import LocationPermission from "@/components/ui/LocationPermission"
+
 export default function PatientOverview({ user }) {
   const upcomingAppointments = [
     {
@@ -41,6 +43,19 @@ export default function PatientOverview({ user }) {
       <div className="bg-card border border-border rounded-lg p-6">
         <h2 className="text-xl font-semibold text-foreground mb-2">Welcome back, {user.name}!</h2>
         <p className="text-muted-foreground">Here's an overview of your healthcare activities.</p>
+      </div>
+
+      {/* Location Section */}
+      <div className="bg-card border border-border rounded-lg p-6">
+        <h3 className="text-lg font-semibold text-foreground mb-4">📍 Your Location</h3>
+        <LocationPermission 
+          userId={user._id || user.id}
+          variant="compact"
+          onLocationUpdate={(location, updatedUser) => {
+            console.log('Location updated:', location);
+            console.log('Updated user:', updatedUser);
+          }}
+        />
       </div>
 
       {/* Quick Stats */}

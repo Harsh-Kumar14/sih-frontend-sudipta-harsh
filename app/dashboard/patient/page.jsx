@@ -19,22 +19,50 @@ export default function PatientDashboard() {
   useEffect(() => {
     // Check authentication
     const userType = localStorage.getItem("userType")
-    const userId = localStorage.getItem("userId")
+    const currentUserData = localStorage.getItem("currentUser")
 
     if (!userType || userType !== "patient") {
       router.push("/login?type=patient")
       return
     }
 
-    // Mock user data
-    setUser({
-      id: userId,
-      name: "John Doe",
-      phone: "+1 (555) 123-4567",
-      email: "john.doe@email.com",
-      dateOfBirth: "1990-05-15",
-      bloodGroup: "O+",
-    })
+    // Get user data from localStorage or use mock data
+    if (currentUserData) {
+      try {
+        const userData = JSON.parse(currentUserData)
+        setUser({
+          _id: userData._id || userData.id, // Use _id from MongoDB
+          id: userData._id || userData.id, // Keep id for compatibility
+          name: userData.name || "John Doe",
+          contact: userData.contact || "+1 (555) 123-4567",
+          phone: userData.contact || "+1 (555) 123-4567",
+          email: "john.doe@email.com", // This would need to be added to the user model
+          dateOfBirth: "1990-05-15", // This would need to be added to the user model
+          bloodGroup: "O+", // This would need to be added to the user model
+        })
+      } catch (error) {
+        console.error('Error parsing user data:', error)
+        // Fallback to mock data
+        setUser({
+          id: "mock_user_id",
+          name: "John Doe",
+          phone: "+1 (555) 123-4567",
+          email: "john.doe@email.com",
+          dateOfBirth: "1990-05-15",
+          bloodGroup: "O+",
+        })
+      }
+    } else {
+      // Fallback to mock data if no user data found
+      setUser({
+        id: "mock_user_id",
+        name: "John Doe",
+        phone: "+1 (555) 123-4567",
+        email: "john.doe@email.com",
+        dateOfBirth: "1990-05-15",
+        bloodGroup: "O+",
+      })
+    }
   }, [router])
 
   const handleLogout = () => {

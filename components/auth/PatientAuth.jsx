@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import axios from "axios"
+import LocationPermission from "@/components/ui/LocationPermission"
 
 export default function PatientAuth() {
   const [isLogin, setIsLogin] = useState(true)
@@ -12,10 +13,17 @@ export default function PatientAuth() {
     age: "",
     gender: "",
   })
+  const [location, setLocation] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
   const router = useRouter()
+
+  // Handle location update from LocationPermission component
+  const handleLocationUpdate = (locationData) => {
+    setLocation(locationData)
+    setSuccess("Location access granted successfully!")
+  }
 
   const handleLogin = async (e) => {
     e.preventDefault()
@@ -67,7 +75,8 @@ export default function PatientAuth() {
         contact: formData.contact,
         age: parseInt(formData.age),
         gender: formData.gender,
-        doctorId: "" // Optional field, empty for now
+        doctorId: "", // Optional field, empty for now
+        ...(location && { location: location })
       }
 
       console.log('Sending user data:', userData)
@@ -84,13 +93,15 @@ export default function PatientAuth() {
         
         // Store user data for immediate login
         const createdUser = {
+          _id: response.data.user._id,
           name: response.data.user.name,
           contact: response.data.user.contact,
-          id: response.data.userId
+          id: response.data.user._id // Keep both for compatibility
         }
         
         localStorage.setItem("userType", "patient")
         localStorage.setItem("currentUser", JSON.stringify(createdUser))
+        localStorage.setItem("userId", response.data.user._id)
         
         // Redirect to dashboard after successful signup
         setTimeout(() => {
@@ -125,6 +136,7 @@ export default function PatientAuth() {
 
   const resetForm = () => {
     setFormData({ name: "", contact: "", age: "", gender: "" })
+    setLocation(null)
     setError("")
     setSuccess("")
   }
@@ -247,6 +259,12 @@ export default function PatientAuth() {
               <option value="other">Other</option>
             </select>
           </div>
+
+          {/* Location Permission Section */}
+          <LocationPermission 
+            onLocationUpdate={handleLocationUpdate}
+            className="mb-4"
+          />
 
           <button
             type="submit"
