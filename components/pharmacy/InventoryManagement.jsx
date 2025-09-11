@@ -6,6 +6,20 @@ export default function InventoryManagement() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [stockFilter, setStockFilter] = useState("all")
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [editingMedicine, setEditingMedicine] = useState(null)
+  const [isButtonLoading, setIsButtonLoading] = useState(false)
+  const [addFormData, setAddFormData] = useState({
+    name: "",
+    currentStock: "",
+    diseases: "",
+    expiryDate: "",
+    price: "",
+    lastRestocked: ""
+  })
+  const [editFormData, setEditFormData] = useState({})
+  const [errors, setErrors] = useState({})
 
   const [inventory, setInventory] = useState([
     {
@@ -115,6 +129,152 @@ export default function InventoryManagement() {
 
   const handleReorder = (item) => {
     alert(`Reorder request sent for ${item.name}. This would integrate with supplier systems in a real application.`)
+  }
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target
+    setAddFormData(prev => ({
+      ...prev,
+      [name]: value
+    }))
+  }
+
+  const handleEditInputChange = (e) => {
+    const { name, value } = e.target
+    setEditFormData(prev => ({
+      ...prev,
+      [name]: value
+    }))
+  }
+
+  const handleEditMedicine = (medicine) => {
+    setEditingMedicine(medicine)
+    setEditFormData({
+      name: medicine.name,
+      currentStock: medicine.currentStock.toString(),
+      diseases: Array.isArray(medicine.diseases) ? medicine.diseases.join(', ') : (medicine.diseases || ''),
+      expiryDate: medicine.expiryDate,
+      price: medicine.price.toString(),
+      lastRestocked: medicine.lastRestocked
+    })
+    setShowEditModal(true)
+  }
+
+  const validateForm = () => {
+    const newErrors = {}
+    if (!addFormData.name.trim()) newErrors.name = "Medicine name is required"
+    if (!addFormData.currentStock || addFormData.currentStock <= 0) newErrors.currentStock = "Current stock must be greater than 0"
+    if (!addFormData.diseases.trim()) newErrors.diseases = "Diseases field is required"
+    if (!addFormData.expiryDate) newErrors.expiryDate = "Expiry date is required"
+    if (!addFormData.price || addFormData.price <= 0) newErrors.price = "Price must be greater than 0"
+    if (!addFormData.lastRestocked) newErrors.lastRestocked = "Last restocked date is required"
+    
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const validateEditForm = () => {
+    const newErrors = {}
+    if (!editFormData.name?.trim()) newErrors.name = "Medicine name is required"
+    if (!editFormData.currentStock || editFormData.currentStock <= 0) newErrors.currentStock = "Current stock must be greater than 0"
+    if (!editFormData.diseases?.trim()) newErrors.diseases = "Diseases field is required"
+    if (!editFormData.expiryDate) newErrors.expiryDate = "Expiry date is required"
+    if (!editFormData.price || editFormData.price <= 0) newErrors.price = "Price must be greater than 0"
+    if (!editFormData.lastRestocked) newErrors.lastRestocked = "Last restocked date is required"
+    
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleAddMedicine = (e) => {
+    e.preventDefault()
+    
+    if (!validateForm()) {
+      return
+    }
+
+    setIsButtonLoading(true)
+
+    // Simulate API call
+    setTimeout(() => {
+      const newMedicine = {
+        id: Date.now(),
+        name: addFormData.name,
+        category: "General", // You can add category selection later
+        currentStock: parseInt(addFormData.currentStock),
+        minStock: 20, // Default values
+        maxStock: 100,
+        price: parseFloat(addFormData.price),
+        supplier: "New Supplier", // Default value
+        expiryDate: addFormData.expiryDate,
+        batchNumber: `MED${Date.now()}`,
+        lastRestocked: addFormData.lastRestocked,
+        diseases: addFormData.diseases.split(',').map(d => d.trim())
+      }
+
+      setInventory(prev => [newMedicine, ...prev])
+      setAddFormData({
+        name: "",
+        currentStock: "",
+        diseases: "",
+        expiryDate: "",
+        price: "",
+        lastRestocked: ""
+      })
+      setErrors({})
+      setShowAddModal(false)
+      setIsButtonLoading(false)
+    }, 1000)
+  }
+
+  const handleUpdateMedicine = (e) => {
+    e.preventDefault()
+    
+    if (!validateEditForm()) {
+      return
+    }
+
+    setIsButtonLoading(true)
+
+    // Simulate API call
+    setTimeout(() => {
+      const updatedMedicine = {
+        ...editingMedicine,
+        name: editFormData.name,
+        currentStock: parseInt(editFormData.currentStock),
+        price: parseFloat(editFormData.price),
+        expiryDate: editFormData.expiryDate,
+        lastRestocked: editFormData.lastRestocked,
+        diseases: editFormData.diseases.split(',').map(d => d.trim()),
+        dateUpdated: new Date().toISOString()
+      }
+
+      setInventory(prev => prev.map(item => 
+        item.id === editingMedicine.id ? updatedMedicine : item
+      ))
+      
+      setEditFormData({})
+      setErrors({})
+      setShowEditModal(false)
+      setEditingMedicine(null)
+      setIsButtonLoading(false)
+    }, 1000)
+  }
+
+  const handleCloseModal = () => {
+    setShowAddModal(false)
+    setShowEditModal(false)
+    setEditingMedicine(null)
+    setAddFormData({
+      name: "",
+      currentStock: "",
+      diseases: "",
+      expiryDate: "",
+      price: "",
+      lastRestocked: ""
+    })
+    setEditFormData({})
+    setErrors({})
   }
 
   const inventoryStats = {
@@ -259,6 +419,37 @@ export default function InventoryManagement() {
         </div>
       </div>
 
+      {/* Header with Add Medicine Button */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold text-foreground">Medicine Inventory</h2>
+          <p className="text-muted-foreground">Manage your medicine stock and inventory</p>
+        </div>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="group bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl"
+          >
+            {isButtonLoading ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <span>Loading...</span>
+              </>
+            ) : (
+              <>
+                <svg className="w-4 h-4 transition-transform duration-200 group-hover:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                <span>Add Medicine</span>
+              </>
+            )}
+          </button>
+          <span className="text-sm text-muted-foreground">
+            {filteredInventory.length} medicines found
+          </span>
+        </div>
+      </div>
+
       {/* Inventory List */}
       <div className="space-y-4">
         {filteredInventory.map((item) => {
@@ -273,6 +464,15 @@ export default function InventoryManagement() {
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStockColor(stockStatus)}`}>
                       {stockStatus} stock
                     </span>
+                    <button 
+                      onClick={() => handleEditMedicine(item)}
+                      className="p-1.5 bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors"
+                      title="Edit Medicine"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </button>
                   </div>
 
                   <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-4 text-sm">
@@ -321,10 +521,8 @@ export default function InventoryManagement() {
                       value={item.currentStock}
                       onChange={(e) => handleUpdateStock(item.id, Number.parseInt(e.target.value) || 0)}
                       className="flex-1 px-2 py-1 border border-border rounded text-sm bg-input text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                      placeholder="Update stock"
                     />
-                    <button className="px-3 py-1 bg-primary text-primary-foreground rounded text-sm font-medium hover:bg-primary/90 transition-colors">
-                      Update
-                    </button>
                   </div>
                   {stockStatus === "low" && (
                     <button
@@ -347,6 +545,334 @@ export default function InventoryManagement() {
       {filteredInventory.length === 0 && (
         <div className="text-center py-12">
           <p className="text-muted-foreground">No inventory items found matching your criteria.</p>
+        </div>
+      )}
+
+      {/* Add Medicine Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-in fade-in-0 duration-300">
+          <div className="bg-card border border-border rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl animate-in slide-in-from-bottom-4 zoom-in-95 duration-300">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-foreground">Add New Medicine</h3>
+              <button
+                onClick={handleCloseModal}
+                className="text-muted-foreground hover:text-foreground transition-colors duration-200 hover:bg-muted rounded-full p-1"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <form onSubmit={handleAddMedicine} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Medicine Name */}
+                <div>
+                  <label htmlFor="add-name" className="block text-sm font-medium text-foreground mb-1">
+                    Medicine Name *
+                  </label>
+                  <input
+                    type="text"
+                    id="add-name"
+                    name="name"
+                    value={addFormData.name}
+                    onChange={handleInputChange}
+                    className={`w-full px-3 py-2 border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary ${
+                      errors.name ? 'border-red-500' : 'border-border'
+                    }`}
+                    placeholder="e.g., Paracetamol 500mg"
+                  />
+                  {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+                </div>
+
+                {/* Current Stock */}
+                <div>
+                  <label htmlFor="add-stock" className="block text-sm font-medium text-foreground mb-1">
+                    Current Stock *
+                  </label>
+                  <input
+                    type="number"
+                    id="add-stock"
+                    name="currentStock"
+                    min="1"
+                    value={addFormData.currentStock}
+                    onChange={handleInputChange}
+                    className={`w-full px-3 py-2 border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary ${
+                      errors.currentStock ? 'border-red-500' : 'border-border'
+                    }`}
+                    placeholder="e.g., 100"
+                  />
+                  {errors.currentStock && <p className="text-red-500 text-sm mt-1">{errors.currentStock}</p>}
+                </div>
+
+                {/* Price */}
+                <div>
+                  <label htmlFor="add-price" className="block text-sm font-medium text-foreground mb-1">
+                    Price ($) *
+                  </label>
+                  <input
+                    type="number"
+                    id="add-price"
+                    name="price"
+                    min="0"
+                    step="0.01"
+                    value={addFormData.price}
+                    onChange={handleInputChange}
+                    className={`w-full px-3 py-2 border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary ${
+                      errors.price ? 'border-red-500' : 'border-border'
+                    }`}
+                    placeholder="e.g., 15.99"
+                  />
+                  {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price}</p>}
+                </div>
+
+                {/* Expiry Date */}
+                <div>
+                  <label htmlFor="add-expiry" className="block text-sm font-medium text-foreground mb-1">
+                    Expiry Date *
+                  </label>
+                  <input
+                    type="date"
+                    id="add-expiry"
+                    name="expiryDate"
+                    value={addFormData.expiryDate}
+                    onChange={handleInputChange}
+                    className={`w-full px-3 py-2 border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary ${
+                      errors.expiryDate ? 'border-red-500' : 'border-border'
+                    }`}
+                  />
+                  {errors.expiryDate && <p className="text-red-500 text-sm mt-1">{errors.expiryDate}</p>}
+                </div>
+
+                {/* Last Restocked */}
+                <div>
+                  <label htmlFor="add-restocked" className="block text-sm font-medium text-foreground mb-1">
+                    Last Restocked *
+                  </label>
+                  <input
+                    type="date"
+                    id="add-restocked"
+                    name="lastRestocked"
+                    value={addFormData.lastRestocked}
+                    onChange={handleInputChange}
+                    className={`w-full px-3 py-2 border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary ${
+                      errors.lastRestocked ? 'border-red-500' : 'border-border'
+                    }`}
+                  />
+                  {errors.lastRestocked && <p className="text-red-500 text-sm mt-1">{errors.lastRestocked}</p>}
+                </div>
+              </div>
+
+              {/* Diseases (full width) */}
+              <div>
+                <label htmlFor="add-diseases" className="block text-sm font-medium text-foreground mb-1">
+                  Diseases/Conditions *
+                </label>
+                <textarea
+                  id="add-diseases"
+                  name="diseases"
+                  value={addFormData.diseases}
+                  onChange={handleInputChange}
+                  rows={3}
+                  className={`w-full px-3 py-2 border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary ${
+                    errors.diseases ? 'border-red-500' : 'border-border'
+                  }`}
+                  placeholder="e.g., Fever, Pain, Headache (separate with commas)"
+                />
+                {errors.diseases && <p className="text-red-500 text-sm mt-1">{errors.diseases}</p>}
+                <p className="text-xs text-muted-foreground mt-1">Enter diseases/conditions separated by commas</p>
+              </div>
+
+              {/* Form Actions */}
+              <div className="flex justify-end gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={handleCloseModal}
+                  className="px-4 py-2 border border-border text-foreground rounded-lg hover:bg-muted transition-colors duration-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isButtonLoading}
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors duration-200 disabled:opacity-50 flex items-center gap-2"
+                >
+                  {isButtonLoading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      Adding...
+                    </>
+                  ) : (
+                    'Add Medicine'
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Medicine Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-in fade-in-0 duration-300">
+          <div className="bg-card border border-border rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl animate-in slide-in-from-bottom-4 zoom-in-95 duration-300">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-foreground">Edit Medicine</h3>
+              <button
+                onClick={handleCloseModal}
+                className="text-muted-foreground hover:text-foreground transition-colors duration-200 hover:bg-muted rounded-full p-1"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateMedicine} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Medicine Name */}
+                <div>
+                  <label htmlFor="edit-name" className="block text-sm font-medium text-foreground mb-1">
+                    Medicine Name *
+                  </label>
+                  <input
+                    type="text"
+                    id="edit-name"
+                    name="name"
+                    value={editFormData.name || ''}
+                    onChange={handleEditInputChange}
+                    className={`w-full px-3 py-2 border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary ${
+                      errors.name ? 'border-red-500' : 'border-border'
+                    }`}
+                    placeholder="e.g., Paracetamol 500mg"
+                  />
+                  {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+                </div>
+
+                {/* Current Stock */}
+                <div>
+                  <label htmlFor="edit-stock" className="block text-sm font-medium text-foreground mb-1">
+                    Current Stock *
+                  </label>
+                  <input
+                    type="number"
+                    id="edit-stock"
+                    name="currentStock"
+                    min="1"
+                    value={editFormData.currentStock || ''}
+                    onChange={handleEditInputChange}
+                    className={`w-full px-3 py-2 border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary ${
+                      errors.currentStock ? 'border-red-500' : 'border-border'
+                    }`}
+                    placeholder="e.g., 100"
+                  />
+                  {errors.currentStock && <p className="text-red-500 text-sm mt-1">{errors.currentStock}</p>}
+                </div>
+
+                {/* Price */}
+                <div>
+                  <label htmlFor="edit-price" className="block text-sm font-medium text-foreground mb-1">
+                    Price ($) *
+                  </label>
+                  <input
+                    type="number"
+                    id="edit-price"
+                    name="price"
+                    min="0"
+                    step="0.01"
+                    value={editFormData.price || ''}
+                    onChange={handleEditInputChange}
+                    className={`w-full px-3 py-2 border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary ${
+                      errors.price ? 'border-red-500' : 'border-border'
+                    }`}
+                    placeholder="e.g., 15.99"
+                  />
+                  {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price}</p>}
+                </div>
+
+                {/* Expiry Date */}
+                <div>
+                  <label htmlFor="edit-expiry" className="block text-sm font-medium text-foreground mb-1">
+                    Expiry Date *
+                  </label>
+                  <input
+                    type="date"
+                    id="edit-expiry"
+                    name="expiryDate"
+                    value={editFormData.expiryDate || ''}
+                    onChange={handleEditInputChange}
+                    className={`w-full px-3 py-2 border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary ${
+                      errors.expiryDate ? 'border-red-500' : 'border-border'
+                    }`}
+                  />
+                  {errors.expiryDate && <p className="text-red-500 text-sm mt-1">{errors.expiryDate}</p>}
+                </div>
+
+                {/* Last Restocked */}
+                <div>
+                  <label htmlFor="edit-restocked" className="block text-sm font-medium text-foreground mb-1">
+                    Last Restocked *
+                  </label>
+                  <input
+                    type="date"
+                    id="edit-restocked"
+                    name="lastRestocked"
+                    value={editFormData.lastRestocked || ''}
+                    onChange={handleEditInputChange}
+                    className={`w-full px-3 py-2 border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary ${
+                      errors.lastRestocked ? 'border-red-500' : 'border-border'
+                    }`}
+                  />
+                  {errors.lastRestocked && <p className="text-red-500 text-sm mt-1">{errors.lastRestocked}</p>}
+                </div>
+              </div>
+
+              {/* Diseases (full width) */}
+              <div>
+                <label htmlFor="edit-diseases" className="block text-sm font-medium text-foreground mb-1">
+                  Diseases/Conditions *
+                </label>
+                <textarea
+                  id="edit-diseases"
+                  name="diseases"
+                  value={editFormData.diseases || ''}
+                  onChange={handleEditInputChange}
+                  rows={3}
+                  className={`w-full px-3 py-2 border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary ${
+                    errors.diseases ? 'border-red-500' : 'border-border'
+                  }`}
+                  placeholder="e.g., Fever, Pain, Headache (separate with commas)"
+                />
+                {errors.diseases && <p className="text-red-500 text-sm mt-1">{errors.diseases}</p>}
+                <p className="text-xs text-muted-foreground mt-1">Enter diseases/conditions separated by commas</p>
+              </div>
+
+              {/* Form Actions */}
+              <div className="flex justify-end gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={handleCloseModal}
+                  className="px-4 py-2 border border-border text-foreground rounded-lg hover:bg-muted transition-colors duration-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isButtonLoading}
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors duration-200 disabled:opacity-50 flex items-center gap-2"
+                >
+                  {isButtonLoading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      Updating...
+                    </>
+                  ) : (
+                    'Update Medicine'
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>
