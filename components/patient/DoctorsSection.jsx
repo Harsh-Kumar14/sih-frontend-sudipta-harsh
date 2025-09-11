@@ -323,6 +323,9 @@ export default function DoctorsSection() {
                   <button className="border border-border text-foreground px-4 py-2 rounded-md font-medium hover:bg-muted transition-colors">
                     View Profile
                   </button>
+
+                  
+                  
                   <button
                     onClick={() => handleStartChat(doctor)}
                     className="bg-secondary text-secondary-foreground px-4 py-2 rounded-md font-medium hover:bg-secondary/90 transition-colors flex items-center gap-2"
