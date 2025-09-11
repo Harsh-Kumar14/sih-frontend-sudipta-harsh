@@ -5,6 +5,29 @@ import { useState, useEffect } from "react"
 export default function PatientQueue() {
   const [queueFilter, setQueueFilter] = useState("all")
   const [activeChatPatient, setActiveChatPatient] = useState(null)
+  const [consultationOptionsPatient, setConsultationOptionsPatient] = useState(null)
+  const [showPrescriptionModal, setShowPrescriptionModal] = useState(false)
+  const [prescriptionPatient, setPrescriptionPatient] = useState(null)
+  const [prescriptionFormData, setPrescriptionFormData] = useState({
+    medicines: [
+      {
+        id: 1,
+        medicineName: "",
+        dosage: "",
+        timingOfTaking: "",
+        instructions: ""
+      }
+    ]
+  })
+  const [prescriptionErrors, setPrescriptionErrors] = useState({})
+  const [isButtonLoading, setIsButtonLoading] = useState(false)
+  const [medicineSearchTerm, setMedicineSearchTerm] = useState("")
+  const [availableMedicines] = useState([
+    "Paracetamol 500mg", "Ibuprofen 400mg", "Amoxicillin 250mg", "Azithromycin 500mg",
+    "Omeprazole 20mg", "Metformin 500mg", "Atorvastatin 20mg", "Amlodipine 5mg",
+    "Lisinopril 10mg", "Aspirin 75mg", "Ciprofloxacin 500mg", "Doxycycline 100mg",
+    "Prednisolone 5mg", "Insulin Glargine", "Salbutamol Inhaler", "Loratadine 10mg"
+  ])
   const [chatMessages, setChatMessages] = useState({})
   const [newMessage, setNewMessage] = useState("")
   const [patients, setPatients] = useState([])
@@ -111,16 +134,181 @@ export default function PatientQueue() {
   }
 
   const handleStartConsultation = (patient) => {
-    handleStatusChange(patient.id, "in-progress")
-    if (patient.type === "Video Consultation") {
-      alert(`Starting video consultation with ${patient.name}. This would open the video call interface.`)
-    } else {
-      alert(`Patient ${patient.name} is ready for in-person consultation.`)
+    setConsultationOptionsPatient(patient)
+  }
+
+  const handleChatConsultation = (patient) => {
+    setActiveChatPatient(patient)
+    // Don't change status here - keep consultation options available
+    if (!chatMessages[patient.id]) {
+      setChatMessages(prev => ({
+        ...prev,
+        [patient.id]: [
+          {
+            id: 1,
+            sender: "system",
+            message: `Chat consultation started with ${patient.name}`,
+            timestamp: new Date().toLocaleTimeString()
+          }
+        ]
+      }))
     }
+  }
+
+  const handleVideoConsultation = (patient) => {
+    // Don't change status here - keep consultation options available
+    alert(`Starting video consultation with ${patient.name}. This would open the video call interface.`)
+  }
+
+  const handlePrescribeMedicines = (patient) => {
+    setPrescriptionPatient(patient)
+    setShowPrescriptionModal(true)
+  }
+
+  const handlePrescriptionInputChange = (e, medicineIndex) => {
+    const { name, value } = e.target
+    setPrescriptionFormData(prev => ({
+      ...prev,
+      medicines: prev.medicines.map((medicine, index) => 
+        index === medicineIndex 
+          ? { ...medicine, [name]: value }
+          : medicine
+      )
+    }))
+  }
+
+  const addNewMedicine = () => {
+    setPrescriptionFormData(prev => ({
+      ...prev,
+      medicines: [
+        ...prev.medicines,
+        {
+          id: Date.now(),
+          medicineName: "",
+          dosage: "",
+          timingOfTaking: "",
+          instructions: ""
+        }
+      ]
+    }))
+  }
+
+  const removeMedicine = (medicineIndex) => {
+    if (prescriptionFormData.medicines.length > 1) {
+      setPrescriptionFormData(prev => ({
+        ...prev,
+        medicines: prev.medicines.filter((_, index) => index !== medicineIndex)
+      }))
+    }
+  }
+
+  const selectMedicine = (medicineName, medicineIndex) => {
+    setPrescriptionFormData(prev => ({
+      ...prev,
+      medicines: prev.medicines.map((medicine, index) => 
+        index === medicineIndex 
+          ? { ...medicine, medicineName }
+          : medicine
+      )
+    }))
+    setMedicineSearchTerm("")
+  }
+
+  const getFilteredMedicines = (searchTerm) => {
+    if (!searchTerm) return []
+    return availableMedicines.filter(medicine => 
+      medicine.toLowerCase().includes(searchTerm.toLowerCase())
+    ).slice(0, 5) // Limit to 5 results
+  }
+
+  const validatePrescriptionForm = () => {
+    const newErrors = {}
+    
+    prescriptionFormData.medicines.forEach((medicine, index) => {
+      if (!medicine.medicineName.trim()) {
+        newErrors[`medicineName_${index}`] = "Medicine name is required"
+      }
+      if (!medicine.dosage.trim()) {
+        newErrors[`dosage_${index}`] = "Dosage is required"
+      }
+      if (!medicine.timingOfTaking.trim()) {
+        newErrors[`timingOfTaking_${index}`] = "Timing of taking is required"
+      }
+    })
+    
+    setPrescriptionErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleSubmitPrescription = (e) => {
+    e.preventDefault()
+    
+    if (!validatePrescriptionForm()) {
+      return
+    }
+
+    setIsButtonLoading(true)
+
+    // Simulate API call
+    setTimeout(() => {
+      const prescriptions = prescriptionFormData.medicines.map((medicine, index) => ({
+        id: Date.now() + index,
+        patientId: prescriptionPatient.id,
+        patientName: prescriptionPatient.name,
+        medicineName: medicine.medicineName,
+        dosage: medicine.dosage,
+        timingOfTaking: medicine.timingOfTaking,
+        instructions: medicine.instructions,
+        prescribedBy: "Dr. Current Doctor", // You can get this from auth context
+        prescribedDate: new Date().toISOString(),
+      }))
+
+      // Here you would typically save to database
+      console.log('Prescriptions created:', prescriptions)
+      
+      // Reset form and close modal
+      setPrescriptionFormData({
+        medicines: [
+          {
+            id: 1,
+            medicineName: "",
+            dosage: "",
+            timingOfTaking: "",
+            instructions: ""
+          }
+        ]
+      })
+      setPrescriptionErrors({})
+      setShowPrescriptionModal(false)
+      setPrescriptionPatient(null)
+      setIsButtonLoading(false)
+      
+      alert(`${prescriptionFormData.medicines.length} prescription(s) for ${prescriptionPatient.name} have been saved successfully!`)
+    }, 1000)
+  }
+
+  const handleClosePrescriptionModal = () => {
+    setShowPrescriptionModal(false)
+    setPrescriptionPatient(null)
+    setPrescriptionFormData({
+      medicines: [
+        {
+          id: 1,
+          medicineName: "",
+          dosage: "",
+          timingOfTaking: "",
+          instructions: ""
+        }
+      ]
+    })
+    setPrescriptionErrors({})
+    setMedicineSearchTerm("")
   }
 
   const handleCompleteConsultation = (patient) => {
     handleStatusChange(patient.id, "completed")
+    setConsultationOptionsPatient(null) // Clear consultation options
+    setActiveChatPatient(null) // Close chat if open
     alert(`Consultation with ${patient.name} marked as completed.`)
   }
 
@@ -387,7 +575,7 @@ export default function PatientQueue() {
               </div>
 
               <div className="flex gap-2">
-                {patient.status === "waiting" && (
+                {patient.status === "waiting" && consultationOptionsPatient?.id !== patient.id && (
                   <button
                     onClick={() => handleStartConsultation(patient)}
                     className="bg-secondary text-secondary-foreground px-4 py-2 rounded-md font-medium hover:bg-secondary/90 transition-colors"
@@ -395,7 +583,52 @@ export default function PatientQueue() {
                     Start Consultation
                   </button>
                 )}
-                {patient.status === "in-progress" && (
+                
+                {consultationOptionsPatient?.id === patient.id && (
+                  <div className="flex gap-2 flex-wrap">
+                    <button
+                      onClick={() => handleChatConsultation(patient)}
+                      className="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 transition-colors flex items-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                      </svg>
+                      Chat
+                    </button>
+                    <button
+                      onClick={() => handleVideoConsultation(patient)}
+                      className="bg-green-600 text-white px-4 py-2 rounded-md font-medium hover:bg-green-700 transition-colors flex items-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                      Video Call
+                    </button>
+                    <button
+                      onClick={() => handlePrescribeMedicines(patient)}
+                      className="bg-purple-600 text-white px-4 py-2 rounded-md font-medium hover:bg-purple-700 transition-colors flex items-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      Prescribe
+                    </button>
+                    <button
+                      onClick={() => handleCompleteConsultation(patient)}
+                      className="bg-primary text-primary-foreground px-4 py-2 rounded-md font-medium hover:bg-primary/90 transition-colors"
+                    >
+                      Complete
+                    </button>
+                    <button
+                      onClick={() => setConsultationOptionsPatient(null)}
+                      className="border border-border text-foreground px-3 py-2 rounded-md font-medium hover:bg-muted transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                )}
+                
+                {patient.status === "in-progress" && consultationOptionsPatient?.id !== patient.id && (
                   <>
                     <button
                       onClick={() => handleStartChat(patient)}
@@ -414,9 +647,12 @@ export default function PatientQueue() {
                     </button>
                   </>
                 )}
-                <button className="border border-border text-foreground px-4 py-2 rounded-md font-medium hover:bg-muted transition-colors">
-                  View History
-                </button>
+                
+                {patient.status !== "completed" && consultationOptionsPatient?.id !== patient.id && (
+                  <button className="border border-border text-foreground px-4 py-2 rounded-md font-medium hover:bg-muted transition-colors">
+                    View History
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -503,6 +739,207 @@ export default function PatientQueue() {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Prescription Modal */}
+      {showPrescriptionModal && (
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-in fade-in-0 duration-300">
+          <div className="bg-card border border-border rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl animate-in slide-in-from-bottom-4 zoom-in-95 duration-300">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-foreground">
+                Prescribe Medicine - {prescriptionPatient?.name}
+              </h3>
+              <button
+                onClick={handleClosePrescriptionModal}
+                className="text-muted-foreground hover:text-foreground transition-colors duration-200 hover:bg-muted rounded-full p-1"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmitPrescription} className="space-y-6">
+              <div className="space-y-4">
+                {prescriptionFormData.medicines.map((medicine, index) => (
+                  <div key={medicine.id} className="border border-border rounded-lg p-4 bg-muted/20">
+                    <div className="flex justify-between items-center mb-4">
+                      <h4 className="text-md font-medium text-foreground">
+                        Medicine {index + 1}
+                      </h4>
+                      {prescriptionFormData.medicines.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeMedicine(index)}
+                          className="text-red-500 hover:text-red-700 transition-colors p-1"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Medicine Name with Search */}
+                      <div className="relative">
+                        <label htmlFor={`medicineName_${index}`} className="block text-sm font-medium text-foreground mb-1">
+                          Medicine Name *
+                        </label>
+                        <input
+                          type="text"
+                          id={`medicineName_${index}`}
+                          name="medicineName"
+                          value={medicine.medicineName}
+                          onChange={(e) => {
+                            handlePrescriptionInputChange(e, index)
+                            setMedicineSearchTerm(e.target.value)
+                          }}
+                          className={`w-full px-3 py-2 border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary ${
+                            prescriptionErrors[`medicineName_${index}`] ? 'border-red-500' : 'border-border'
+                          }`}
+                          placeholder="Search or type medicine name"
+                        />
+                        {prescriptionErrors[`medicineName_${index}`] && (
+                          <p className="text-red-500 text-sm mt-1">{prescriptionErrors[`medicineName_${index}`]}</p>
+                        )}
+                        
+                        {/* Search Results Dropdown */}
+                        {medicineSearchTerm && getFilteredMedicines(medicineSearchTerm).length > 0 && (
+                          <div className="absolute top-full left-0 right-0 z-10 mt-1 bg-background border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                            {getFilteredMedicines(medicineSearchTerm).map((medicineName, searchIndex) => (
+                              <button
+                                key={searchIndex}
+                                type="button"
+                                onClick={() => selectMedicine(medicineName, index)}
+                                className="w-full px-3 py-2 text-left hover:bg-muted transition-colors text-foreground"
+                              >
+                                {medicineName}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Dosage */}
+                      <div>
+                        <label htmlFor={`dosage_${index}`} className="block text-sm font-medium text-foreground mb-1">
+                          Dosage *
+                        </label>
+                        <input
+                          type="text"
+                          id={`dosage_${index}`}
+                          name="dosage"
+                          value={medicine.dosage}
+                          onChange={(e) => handlePrescriptionInputChange(e, index)}
+                          className={`w-full px-3 py-2 border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary ${
+                            prescriptionErrors[`dosage_${index}`] ? 'border-red-500' : 'border-border'
+                          }`}
+                          placeholder="e.g., 1 tablet, 2 capsules"
+                        />
+                        {prescriptionErrors[`dosage_${index}`] && (
+                          <p className="text-red-500 text-sm mt-1">{prescriptionErrors[`dosage_${index}`]}</p>
+                        )}
+                      </div>
+
+                      {/* Timing of Taking */}
+                      <div>
+                        <label htmlFor={`timingOfTaking_${index}`} className="block text-sm font-medium text-foreground mb-1">
+                          Timing of Taking *
+                        </label>
+                        <select
+                          id={`timingOfTaking_${index}`}
+                          name="timingOfTaking"
+                          value={medicine.timingOfTaking}
+                          onChange={(e) => handlePrescriptionInputChange(e, index)}
+                          className={`w-full px-3 py-2 border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary ${
+                            prescriptionErrors[`timingOfTaking_${index}`] ? 'border-red-500' : 'border-border'
+                          }`}
+                        >
+                          <option value="">Select timing</option>
+                          <option value="Before breakfast">Before breakfast</option>
+                          <option value="After breakfast">After breakfast</option>
+                          <option value="Before lunch">Before lunch</option>
+                          <option value="After lunch">After lunch</option>
+                          <option value="Before dinner">Before dinner</option>
+                          <option value="After dinner">After dinner</option>
+                          <option value="Before bed">Before bed</option>
+                          <option value="Every 4 hours">Every 4 hours</option>
+                          <option value="Every 6 hours">Every 6 hours</option>
+                          <option value="Every 8 hours">Every 8 hours</option>
+                          <option value="Twice daily">Twice daily</option>
+                          <option value="Three times daily">Three times daily</option>
+                          <option value="As needed">As needed (PRN)</option>
+                        </select>
+                        {prescriptionErrors[`timingOfTaking_${index}`] && (
+                          <p className="text-red-500 text-sm mt-1">{prescriptionErrors[`timingOfTaking_${index}`]}</p>
+                        )}
+                      </div>
+
+                      {/* Instructions */}
+                      <div>
+                        <label htmlFor={`instructions_${index}`} className="block text-sm font-medium text-foreground mb-1">
+                          Instructions
+                        </label>
+                        <textarea
+                          id={`instructions_${index}`}
+                          name="instructions"
+                          value={medicine.instructions}
+                          onChange={(e) => handlePrescriptionInputChange(e, index)}
+                          rows={2}
+                          className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                          placeholder="Special instructions (optional)"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Add Medicine Button */}
+                <button
+                  type="button"
+                  onClick={addNewMedicine}
+                  className="w-full border-2 border-dashed border-border hover:border-primary text-muted-foreground hover:text-primary transition-colors duration-200 py-3 px-4 rounded-lg flex items-center justify-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  Add Another Medicine
+                </button>
+              </div>
+
+              {/* Form Actions */}
+              <div className="flex justify-end gap-3 pt-4 border-t border-border">
+                <button
+                  type="button"
+                  onClick={handleClosePrescriptionModal}
+                  className="px-4 py-2 border border-border text-foreground rounded-lg hover:bg-muted transition-colors duration-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isButtonLoading}
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors duration-200 disabled:opacity-50 flex items-center gap-2"
+                >
+                  {isButtonLoading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      Prescribing...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      Prescribe {prescriptionFormData.medicines.length} Medicine{prescriptionFormData.medicines.length > 1 ? 's' : ''}
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

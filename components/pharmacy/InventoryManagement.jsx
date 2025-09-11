@@ -123,14 +123,6 @@ export default function InventoryManagement() {
     return matchesSearch && matchesCategory && matchesStock
   })
 
-  const handleUpdateStock = (itemId, newStock) => {
-    setInventory(inventory.map((item) => (item.id === itemId ? { ...item, currentStock: newStock } : item)))
-  }
-
-  const handleReorder = (item) => {
-    alert(`Reorder request sent for ${item.name}. This would integrate with supplier systems in a real application.`)
-  }
-
   const handleInputChange = (e) => {
     const { name, value } = e.target
     setAddFormData(prev => ({
@@ -481,12 +473,6 @@ export default function InventoryManagement() {
                       <p className="font-medium text-foreground">{item.currentStock} units</p>
                     </div>
                     <div>
-                      <p className="text-muted-foreground">Min / Max</p>
-                      <p className="font-medium text-foreground">
-                        {item.minStock} / {item.maxStock}
-                      </p>
-                    </div>
-                    <div>
                       <p className="text-muted-foreground">Price</p>
                       <p className="font-medium text-foreground">${item.price}</p>
                     </div>
@@ -499,10 +485,6 @@ export default function InventoryManagement() {
                       <p className="font-medium text-foreground">{item.expiryDate}</p>
                     </div>
                     <div>
-                      <p className="text-muted-foreground">Batch Number</p>
-                      <p className="font-medium text-foreground">{item.batchNumber}</p>
-                    </div>
-                    <div>
                       <p className="text-muted-foreground">Last Restocked</p>
                       <p className="font-medium text-foreground">{item.lastRestocked}</p>
                     </div>
@@ -511,30 +493,6 @@ export default function InventoryManagement() {
                       <p className="font-medium text-foreground">${(item.currentStock * item.price).toFixed(2)}</p>
                     </div>
                   </div>
-                </div>
-
-                <div className="flex flex-col gap-2 xl:w-48">
-                  <div className="flex gap-2">
-                    <input
-                      type="number"
-                      min="0"
-                      value={item.currentStock}
-                      onChange={(e) => handleUpdateStock(item.id, Number.parseInt(e.target.value) || 0)}
-                      className="flex-1 px-2 py-1 border border-border rounded text-sm bg-input text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-                      placeholder="Update stock"
-                    />
-                  </div>
-                  {stockStatus === "low" && (
-                    <button
-                      onClick={() => handleReorder(item)}
-                      className="w-full bg-accent text-accent-foreground px-3 py-2 rounded text-sm font-medium hover:bg-accent/90 transition-colors"
-                    >
-                      Reorder Now
-                    </button>
-                  )}
-                  <button className="w-full border border-border text-foreground px-3 py-2 rounded text-sm font-medium hover:bg-muted transition-colors">
-                    View Details
-                  </button>
                 </div>
               </div>
             </div>
