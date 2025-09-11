@@ -2,6 +2,10 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
+import PatientProfileSection from "../patient/profileSection"
+import DoctorProfileSection from "../doctor/profileSection"
+import HospitalProfileSection from "../hospital/profileSection"
+import PharmacyProfileSection from "../pharmacy/ProfileSection"
 
 export default function DashboardLayout({
   user,
@@ -14,6 +18,7 @@ export default function DashboardLayout({
 }) {
   const [currentUser, setCurrentUser] = useState(user)
   const [isUserLoaded, setIsUserLoaded] = useState(false)
+  const [showProfileModal, setShowProfileModal] = useState(false)
 
   useEffect(() => {
     // Update the user when the user prop changes (after login)
@@ -156,8 +161,30 @@ export default function DashboardLayout({
         return "text-secondary"
       case "pharmacy":
         return "text-accent"
+      case "hospital":
+        return "text-blue-600"
       default:
         return "text-primary"
+    }
+  }
+
+  // Function to render the correct ProfileSection based on userType
+  const renderProfileSection = () => {
+    const handleCloseProfile = () => {
+      setShowProfileModal(false)
+    }
+
+    if (userType === "doctor") {
+      return <DoctorProfileSection initialProfile={currentUser} onClose={handleCloseProfile} />
+    } 
+    else if (userType === "hospital"){
+      return <HospitalProfileSection initialProfile={currentUser} onClose={handleCloseProfile} />
+    }
+    else if (userType === "pharmacy"){
+      return <PharmacyProfileSection initialProfile={currentUser} onClose={handleCloseProfile} />
+    }
+    else {
+      return <PatientProfileSection initialProfile={currentUser} onClose={handleCloseProfile} />
     }
   }
 
@@ -174,22 +201,38 @@ export default function DashboardLayout({
 
         {/* User Info */}
         <div className="p-6 border-b border-border">
-          <div className="flex items-center space-x-3">
-            <div
-              className={`w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center ${getUserTypeColor()}`}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div
+                className={`w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center ${getUserTypeColor()}`}
+              >
+                {!isUserLoaded ? (
+                  <div className="w-4 h-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+                ) : (
+                  currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : 'U'
+                )}
+              </div>
+              <div>
+                <p className="font-medium text-foreground">
+                  {!isUserLoaded
+                    ? 'Loading...'
+                    : userType === 'doctor' && currentUser?.name
+                      ? `Dr. ${currentUser.name}`
+                      : (currentUser?.name || 'Guest User')}
+                </p>
+                <p className="text-sm text-muted-foreground capitalize">{userType}</p>
+              </div>
+            </div>
+            {/* Edit Profile Button */}
+            <button
+              onClick={() => setShowProfileModal(true)}
+              className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              title="Edit Profile"
             >
-              {!isUserLoaded ? (
-                <div className="w-4 h-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
-              ) : (
-                currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : 'U'
-              )}
-            </div>
-            <div>
-              <p className="font-medium text-foreground">
-                {!isUserLoaded ? 'Loading...' : (currentUser?.name || 'Guest User')}
-              </p>
-              <p className="text-sm text-muted-foreground capitalize">{userType}</p>
-            </div>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+            </button>
           </div>
         </div>
 
@@ -255,6 +298,28 @@ export default function DashboardLayout({
         {/* Content */}
         <main className="flex-1 p-6">{children}</main>
       </div>
+
+      {/* Profile Modal */}
+      {showProfileModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm p-4">
+          <div className="bg-white rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto relative">
+            <div className="sticky top-0 bg-white rounded-t-lg border-b border-gray-200 p-4 flex justify-end">
+              <button
+                className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors"
+                onClick={() => setShowProfileModal(false)}
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="p-6">
+              {/* Use the function to render correct profile section */}
+              {renderProfileSection()}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

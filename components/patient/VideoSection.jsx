@@ -1,5 +1,4 @@
-"use client" // Added semicolon after use client directive
-
+"use client" 
 import { useState } from "react"
 
 export default function VideoSection() {

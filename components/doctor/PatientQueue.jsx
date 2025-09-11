@@ -33,6 +33,7 @@ export default function PatientQueue() {
   const [patients, setPatients] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [activeVideoCall, setActiveVideoCall] = useState(null)
 
   // Fetch doctor consultations from backend
   useEffect(() => {
@@ -156,8 +157,17 @@ export default function PatientQueue() {
   }
 
   const handleVideoConsultation = (patient) => {
-    // Don't change status here - keep consultation options available
-    alert(`Starting video consultation with ${patient.name}. This would open the video call interface.`)
+    // Start video consultation with the patient
+    setActiveVideoCall({
+      ...patient,
+      meetingId: `${Math.random().toString(36).substr(2, 3)}-${Math.random().toString(36).substr(2, 3)}-${Math.random().toString(36).substr(2, 3)}`,
+      startTime: new Date().toLocaleTimeString()
+    })
+    setConsultationOptionsPatient(null) // Close consultation options
+  }
+
+  const handleEndVideoCall = () => {
+    setActiveVideoCall(null)
   }
 
   const handlePrescribeMedicines = (patient) => {
@@ -460,6 +470,79 @@ export default function PatientQueue() {
 
   return (
     <div className="space-y-6">
+      {/* Video Call Interface */}
+      {activeVideoCall && (
+        <div className="bg-card border border-border rounded-lg overflow-hidden">
+          <div className="bg-gray-900 aspect-video flex items-center justify-center relative">
+            <div className="text-center text-white">
+              <div className="w-24 h-24 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-12 h-12 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Video Consultation with {activeVideoCall.name}</h3>
+              <p className="text-gray-300">Call in progress...</p>
+            </div>
+
+            {/* Call Controls */}
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-4">
+              <button className="w-12 h-12 bg-gray-700 hover:bg-gray-600 rounded-full flex items-center justify-center transition-colors">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
+                  />
+                </svg>
+              </button>
+              <button className="w-12 h-12 bg-gray-700 hover:bg-gray-600 rounded-full flex items-center justify-center transition-colors">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                  />
+                </svg>
+              </button>
+              <button
+                onClick={handleEndVideoCall}
+                className="w-12 h-12 bg-destructive hover:bg-destructive/90 rounded-full flex items-center justify-center transition-colors"
+              >
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M16 8l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 3l1.5 1.5M4.5 4.5l1.5 1.5M6 6l6 6m6 6l1.5 1.5M19.5 19.5L21 21"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div className="p-4 bg-card">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-semibold text-foreground">{activeVideoCall.name}</h4>
+                <p className="text-sm text-muted-foreground">Age: {activeVideoCall.age} • {activeVideoCall.condition}</p>
+                <p className="text-sm text-muted-foreground">Started: {activeVideoCall.startTime}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-muted-foreground">Meeting ID</p>
+                <p className="font-mono text-sm text-foreground">{activeVideoCall.meetingId}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Loading State */}
       {loading && (
         <div className="text-center py-12">

@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import axios from "axios"
+import LocationPermission from "@/components/ui/LocationPermission"
 
 export default function PatientAuth() {
   // SMS Configuration - 2Factor.in integration
@@ -31,6 +32,12 @@ export default function PatientAuth() {
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
   const router = useRouter()
+
+  // Handle location update from LocationPermission component
+  const handleLocationUpdate = (locationData) => {
+    setLocation(locationData)
+    setSuccess("Location access granted successfully!")
+  }
 
   const handleLogin = async (e) => {
     e.preventDefault()
@@ -229,7 +236,8 @@ export default function PatientAuth() {
         contact: formData.contact,
         age: parseInt(formData.age),
         gender: formData.gender,
-        doctorId: "" // Optional field, empty for now
+        doctorId: "", // Optional field, empty for now
+        ...(location && { location: location })
       }
 
       console.log('Sending user data:', userData)
@@ -513,6 +521,12 @@ export default function PatientAuth() {
               <option value="other">Other</option>
             </select>
           </div>
+
+          {/* Location Permission Section */}
+          <LocationPermission 
+            onLocationUpdate={handleLocationUpdate}
+            className="mb-4"
+          />
 
           <button
             type="submit"

@@ -1,3 +1,5 @@
+import LocationPermission from "@/components/ui/LocationPermission"
+
 export default function PatientOverview({ user }) {
   const upcomingAppointments = [
     {
@@ -36,8 +38,8 @@ export default function PatientOverview({ user }) {
   ]
 
   return (
-    <div className="space-y-6">
-      {/* Welcome Section - Enhanced for accessibility */}
+    <div className="space-y-8">
+      {/* Enhanced Welcome Section */}
       <div className="bg-gradient-to-r from-primary/10 to-secondary/10 border-2 border-primary/20 rounded-xl p-8 shadow-lg">
         <div className="flex items-center gap-4">
           <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center">
@@ -46,13 +48,34 @@ export default function PatientOverview({ user }) {
             </svg>
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-foreground mb-2">Welcome back, {user.name}!</h2>
-            <p className="text-lg text-muted-foreground">Here's your health summary</p>
+            <h2 className="text-3xl font-bold text-foreground mb-2">Welcome back, {user.name}!</h2>
+            <p className="text-lg text-muted-foreground">Here's your health summary and recent activities</p>
           </div>
         </div>
       </div>
 
-      {/* Quick Stats - Enhanced for better visibility */}
+      {/* Enhanced Location Section */}
+      <div className="bg-gradient-to-r from-card to-card/50 border-2 border-border rounded-xl p-8 shadow-lg">
+        <div className="flex items-center gap-4 mb-6">
+          <div className="w-14 h-14 bg-accent/20 rounded-full flex items-center justify-center">
+            <svg className="w-7 h-7 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </div>
+          <h3 className="text-2xl font-bold text-foreground">📍 Your Location</h3>
+        </div>
+        <LocationPermission 
+          userId={user._id || user.id}
+          variant="compact"
+          onLocationUpdate={(location, updatedUser) => {
+            console.log('Location updated:', location);
+            console.log('Updated user:', updatedUser);
+          }}
+        />
+      </div>
+
+      {/* Enhanced Quick Stats */}
       <div className="grid md:grid-cols-3 gap-8">
         <div className="bg-card border-2 border-primary/20 rounded-xl p-8 shadow-lg hover:shadow-xl transition-all cursor-pointer hover:scale-105">
           <div className="text-center">
