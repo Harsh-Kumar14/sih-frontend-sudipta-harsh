@@ -6,13 +6,18 @@ import { useRouter } from "next/navigation"
 export default function ProviderAuth({ userType }) {
   const [isLogin, setIsLogin] = useState(true)
   const [formData, setFormData] = useState({
-    licenseNumber: "",
-    password: "",
-    confirmPassword: "",
     name: "",
-    email: "",
+    licenseNumber: "",
     specialization: "",
+    experience: "",
+    rating: "0",
+    contact: "",
+    email: "",
     location: "",
+    consultationFee: "",
+    availability: "available",
+    password: "",
+    confirmPassword: ""
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
@@ -31,48 +36,74 @@ export default function ProviderAuth({ userType }) {
 
     try {
       if (isLogin) {
-        // Send POST request with credentials to get doctor ID
-        const doctorIdResponse = await fetch("http://localhost:8080/doctorId", {
+        // Doctor sign-in using /doctor-signin
+        const response = await fetch("http://localhost:8080/doctor-signin", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             licenseNumber: formData.licenseNumber,
-            password: formData.password,
-          }),
-        })
-
-        if (doctorIdResponse.ok) {
-          const doctorIdData = await doctorIdResponse.json()
-          const doctorId = doctorIdData.doctorId || doctorIdData.id || doctorIdData
-
-          // Store authentication data
-          localStorage.setItem("userType", userType)
-          localStorage.setItem("doctorId", doctorId)
-          localStorage.setItem("userId", `${userType}_${Date.now()}`)
-
-          console.log("Doctor ID fetched:", doctorId)
-          router.push(`/dashboard/${userType}`)
+            password: formData.password
+          })
+        });
+        if (response.ok) {
+          const data = await response.json();
+          // Store authentication data (doctorId, userType, and full doctor object)
+          localStorage.setItem("userType", userType);
+          localStorage.setItem("doctorId", data.doctor._id);
+          localStorage.setItem("userId", `${userType}_${Date.now()}`);
+          localStorage.setItem("doctorData", JSON.stringify(data.doctor));
+          router.push(`/dashboard/${userType}`);
         } else {
-          const errorData = await doctorIdResponse.json()
-          setError(errorData.message || "Invalid license number or password")
+          const errorData = await response.json();
+          setError(errorData.error || errorData.message || "Invalid license number or password");
         }
       } else {
-        // Registration success - also fetch doctor ID
-        const doctorIdResponse = await fetch("http://localhost:8080/doctorId")
-
-        if (doctorIdResponse.ok) {
-          const doctorIdData = await doctorIdResponse.json()
-          const doctorId = doctorIdData.doctorId || doctorIdData.id || doctorIdData
-
-          localStorage.setItem("userType", userType)
-          localStorage.setItem("doctorId", doctorId)
-          localStorage.setItem("userId", `${userType}_${Date.now()}`)
-
-          router.push(`/dashboard/${userType}`)
+        // Registration for doctor
+        if (userType === "doctor") {
+          // Prepare doctor data with all required fields
+          const doctorData = {
+            name: formData.name,
+            licenseNumber: formData.licenseNumber,
+            specialization: formData.specialization,
+            experience: Number(formData.experience),
+            rating: Number(formData.rating),
+            contact: formData.contact,
+            email: formData.email,
+            location: formData.location,
+            consultationFee: formData.consultationFee,
+            availability: formData.availability,
+            password: formData.password
+          };
+          const response = await fetch("http://localhost:8080/add-doctor", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(doctorData)
+          });
+          if (response.ok) {
+            const data = await response.json();
+            // After registration, fetch the full doctor object for storage
+            const doctorId = data.doctorId;
+            localStorage.setItem("userType", userType);
+            localStorage.setItem("doctorId", doctorId);
+            localStorage.setItem("userId", `${userType}_${Date.now()}`);
+            // Fetch doctor details and store
+            try {
+              const res = await fetch(`http://localhost:8080/doctor/${doctorId}`);
+              if (res.ok) {
+                const docData = await res.json();
+                if (docData && docData.doctor) {
+                  localStorage.setItem("doctorData", JSON.stringify(docData.doctor));
+                }
+              }
+            } catch {}
+            router.push(`/dashboard/${userType}`);
+          } else {
+            const errorData = await response.json();
+            setError(errorData.message || "Registration failed");
+          }
         } else {
-          setError("Registration successful but failed to fetch doctor information")
+          // Registration for other provider types (pharmacy/hospital) - keep existing logic or add as needed
+          setError("Registration for this provider type is not implemented yet.");
         }
       }
     } catch (error) {
@@ -102,7 +133,7 @@ export default function ProviderAuth({ userType }) {
   }
 
   return (
-    <div className="bg-card border border-border rounded-lg p-8">
+  <div className="bg-card border border-border rounded-lg p-8 max-w-2xl mx-auto">
       <div className="text-center mb-6">
         <h3 className="text-xl font-semibold text-foreground mb-2">{getTitle()}</h3>
         <p className="text-muted-foreground">
@@ -117,109 +148,71 @@ export default function ProviderAuth({ userType }) {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {!isLogin && (
+  {!isLogin && userType === "doctor" && (
           <>
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">
-                {userType === "doctor" ? "Doctor Name" : userType === "pharmacy" ? "Pharmacy Name" : "Hospital Name"}
-              </label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                required={!isLogin}
-                value={formData.name}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-border rounded-md bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                placeholder={`Enter ${userType === "doctor" ? "doctor" : userType === "pharmacy" ? "pharmacy" : "hospital"} name`}
-              />
+              <label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">Doctor Name *</label>
+              <input id="name" name="name" type="text" required value={formData.name} onChange={handleInputChange} className="w-full px-3 py-2 border border-border rounded-md bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring" placeholder="Enter doctor name" />
             </div>
-            {userType === "pharmacy" && (
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
-                  Email Address
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  required={!isLogin}
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-border rounded-md bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                  placeholder="Enter email address"
-                />
-              </div>
-            )}
-            {userType === "doctor" && (
-              <div>
-                <label htmlFor="specialization" className="block text-sm font-medium text-foreground mb-2">
-                  Specialization
-                </label>
-                <input
-                  id="specialization"
-                  name="specialization"
-                  type="text"
-                  required={!isLogin}
-                  value={formData.specialization}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-border rounded-md bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                  placeholder="e.g., Cardiology, General Practice"
-                />
-              </div>
-            )}
-            {userType === "hospital" && (
-              <>
-                <div>
-                  <label htmlFor="location" className="block text-sm font-medium text-foreground mb-2">
-                    Hospital Address
-                  </label>
-                  <input
-                    id="location"
-                    name="location"
-                    type="text"
-                    required={!isLogin}
-                    value={formData.location}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-border rounded-md bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                    placeholder="Enter hospital address"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="specialization" className="block text-sm font-medium text-foreground mb-2">
-                    Hospital Type
-                  </label>
-                  <input
-                    id="specialization"
-                    name="specialization"
-                    type="text"
-                    required={!isLogin}
-                    value={formData.specialization}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-border rounded-md bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                    placeholder="e.g., General Hospital, Specialty Center"
-                  />
-                </div>
-              </>
-            )}
+            <div>
+              <label htmlFor="licenseNumber" className="block text-sm font-medium text-foreground mb-2">Medical License Number *</label>
+              <input id="licenseNumber" name="licenseNumber" type="text" required value={formData.licenseNumber} onChange={handleInputChange} className="w-full px-3 py-2 border border-border rounded-md bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring" placeholder="Enter license number" />
+            </div>
+            <div>
+              <label htmlFor="specialization" className="block text-sm font-medium text-foreground mb-2">Specialization *</label>
+              <input id="specialization" name="specialization" type="text" required value={formData.specialization} onChange={handleInputChange} className="w-full px-3 py-2 border border-border rounded-md bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring" placeholder="e.g., Cardiology, General Practice" />
+            </div>
+            <div>
+              <label htmlFor="experience" className="block text-sm font-medium text-foreground mb-2">Experience (years) *</label>
+              <input id="experience" name="experience" type="number" required min="0" value={formData.experience} onChange={handleInputChange} className="w-full px-3 py-2 border border-border rounded-md bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring" placeholder="Enter experience in years" />
+            </div>
+            <div>
+              <label htmlFor="rating" className="block text-sm font-medium text-foreground mb-2">Rating</label>
+              <input id="rating" name="rating" type="number" min="0" max="5" value={formData.rating} onChange={handleInputChange} className="w-full px-3 py-2 border border-border rounded-md bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring" placeholder="Enter rating (0-5)" />
+            </div>
+            <div>
+              <label htmlFor="contact" className="block text-sm font-medium text-foreground mb-2">Contact Number *</label>
+              <input id="contact" name="contact" type="tel" required value={formData.contact} onChange={handleInputChange} className="w-full px-3 py-2 border border-border rounded-md bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring" placeholder="Enter contact number" />
+            </div>
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">Email *</label>
+              <input id="email" name="email" type="email" required value={formData.email} onChange={handleInputChange} className="w-full px-3 py-2 border border-border rounded-md bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring" placeholder="Enter email address" />
+            </div>
+            <div>
+              <label htmlFor="location" className="block text-sm font-medium text-foreground mb-2">Location</label>
+              <input id="location" name="location" type="text" value={formData.location} onChange={handleInputChange} className="w-full px-3 py-2 border border-border rounded-md bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring" placeholder="Enter location" />
+            </div>
+            <div>
+              <label htmlFor="consultationFee" className="block text-sm font-medium text-foreground mb-2">Consultation Fee *</label>
+              <input id="consultationFee" name="consultationFee" type="text" required value={formData.consultationFee} onChange={handleInputChange} className="w-full px-3 py-2 border border-border rounded-md bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring" placeholder="Enter consultation fee" />
+            </div>
+            <div>
+              <label htmlFor="availability" className="block text-sm font-medium text-foreground mb-2">Availability *</label>
+              <select id="availability" name="availability" required value={formData.availability} onChange={handleInputChange} className="w-full px-3 py-2 border border-border rounded-md bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring">
+                <option value="available">Available</option>
+                <option value="not available">Not Available</option>
+              </select>
+            </div>
           </>
         )}
 
-        <div>
-          <label htmlFor="licenseNumber" className="block text-sm font-medium text-foreground mb-2">
-            {getLicenseLabel()}
-          </label>
-          <input
-            id="licenseNumber"
-            name="licenseNumber"
-            type="text"
-            required
-            value={formData.licenseNumber}
-            onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-border rounded-md bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-            placeholder={isLogin ? "Demo: DOC123" : "Enter license number"}
-          />
-        </div>
+        {isLogin && (
+          <div>
+            <label htmlFor="licenseNumber" className="block text-sm font-medium text-foreground mb-2">
+              {getLicenseLabel()}
+            </label>
+            <input
+              id="licenseNumber"
+              name="licenseNumber"
+              type="text"
+              required
+              value={formData.licenseNumber}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-border rounded-md bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              placeholder={isLogin ? "Demo: DOC123" : "Enter license number"}
+            />
+          </div>
+        )}
 
         <div>
           <label htmlFor="password" className="block text-sm font-medium text-foreground mb-2">

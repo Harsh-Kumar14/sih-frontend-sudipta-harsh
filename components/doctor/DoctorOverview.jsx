@@ -148,11 +148,11 @@ export default function DoctorOverview({ user }) {
     <div className="space-y-6">
       {/* Welcome Section */}
       <div className="bg-card border border-border rounded-lg p-6">
-        <h2 className="text-xl font-semibold text-foreground mb-2">Welcome back, {user.name}!</h2>
+        <h2 className="text-xl font-semibold text-foreground mb-2">Welcome back, Dr.{user.name}!</h2>
         <p className="text-muted-foreground">
-          {user.specialization} • {user.hospital}
+          {user.specialization} • {user.location}
         </p>
-        <p className="text-sm text-muted-foreground mt-1">{user.experience} of experience</p>
+        <p className="text-sm text-muted-foreground mt-1">{user.experience} years of experience</p>
       </div>
 
       {/* Today's Stats */}
