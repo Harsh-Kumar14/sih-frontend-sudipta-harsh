@@ -111,29 +111,64 @@ export default function VideoSection() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Quick Actions */}
-      <div className="bg-card border border-border rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-foreground mb-4">Quick Actions</h3>
-        <div className="flex gap-4">
-          <button className="bg-primary text-primary-foreground px-4 py-2 rounded-md font-medium hover:bg-primary/90 transition-colors">
-            Schedule New Call
-          </button>
-          <button className="border border-border text-foreground px-4 py-2 rounded-md font-medium hover:bg-muted transition-colors">
-            Join with Meeting ID
-          </button>
+    <div className="space-y-8">
+      {/* Enhanced Header Section */}
+      <div className="bg-gradient-to-r from-primary/10 to-secondary/10 border-2 border-primary/20 rounded-xl p-8 shadow-lg">
+        <div className="flex items-center gap-4 mb-6">
+          <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center">
+            <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <div>
+            <h2 className="text-3xl font-bold text-foreground mb-2">Video Consultations</h2>
+            <p className="text-lg text-muted-foreground">Connect with your doctors through secure video calls</p>
+          </div>
+        </div>
+
+        {/* Enhanced Quick Actions */}
+        <div className="bg-card border-2 border-border rounded-xl p-6 shadow-sm">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center">
+              <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-bold text-foreground">Quick Actions</h3>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <button className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground px-8 py-4 rounded-xl font-bold text-lg hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center justify-center gap-3">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              Schedule New Call
+            </button>
+            <button className="border-2 border-border text-foreground px-8 py-4 rounded-xl font-bold text-lg hover:bg-gradient-to-r hover:from-muted/50 hover:to-muted/30 transition-all duration-300 hover:shadow-md hover:scale-105 flex items-center justify-center gap-3">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              Join with Meeting ID
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Scheduled Calls */}
-      <div className="bg-card border border-border rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-foreground mb-4">Your Video Consultations</h3>
-        <div className="space-y-4">
+      {/* Enhanced Scheduled Calls */}
+      <div className="bg-gradient-to-r from-card to-card/50 border-2 border-primary/20 rounded-xl p-8 shadow-lg">
+        <div className="flex items-center gap-4 mb-6">
+          <div className="w-14 h-14 bg-primary/20 rounded-full flex items-center justify-center">
+            <svg className="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <h3 className="text-2xl font-bold text-foreground">Your Video Consultations</h3>
+        </div>
+        <div className="space-y-6">
           {scheduledCalls.map((call) => (
-            <div key={call.id} className="flex items-center justify-between p-4 bg-muted rounded-lg">
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                  <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div key={call.id} className="flex flex-col lg:flex-row lg:items-center lg:justify-between p-6 bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20 rounded-xl hover:shadow-md transition-all duration-300">
+              <div className="flex items-center space-x-6 mb-4 lg:mb-0">
+                <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center">
+                  <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -143,19 +178,19 @@ export default function VideoSection() {
                   </svg>
                 </div>
                 <div>
-                  <p className="font-medium text-foreground">{call.doctor}</p>
-                  <p className="text-sm text-muted-foreground">{call.specialization}</p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xl font-bold text-foreground">{call.doctor}</p>
+                  <p className="text-lg text-muted-foreground mb-1">{call.specialization}</p>
+                  <p className="text-base text-muted-foreground">
                     {call.date} at {call.time}
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-4">
                 <span
-                  className={`px-2 py-1 rounded-full text-xs font-medium ${
+                  className={`px-4 py-2 rounded-full text-sm font-bold border-2 ${
                     call.status === "upcoming"
-                      ? "bg-primary/10 text-primary"
-                      : "bg-muted-foreground/10 text-muted-foreground"
+                      ? "bg-green-100 text-green-700 border-green-300"
+                      : "bg-gray-100 text-gray-600 border-gray-300"
                   }`}
                 >
                   {call.status}
@@ -163,8 +198,11 @@ export default function VideoSection() {
                 {call.status === "upcoming" && (
                   <button
                     onClick={() => handleJoinCall(call)}
-                    className="bg-primary text-primary-foreground px-3 py-1 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
+                    className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground px-6 py-3 rounded-xl text-base font-bold hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center gap-2"
                   >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
                     Join Call
                   </button>
                 )}
@@ -174,23 +212,34 @@ export default function VideoSection() {
         </div>
       </div>
 
-      {/* Call History */}
-      <div className="bg-card border border-border rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-foreground mb-4">Recent Call History</h3>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between py-2">
-            <div>
-              <p className="font-medium text-foreground">Dr. Emily Rodriguez</p>
-              <p className="text-sm text-muted-foreground">Jan 10, 2024 • 25 minutes</p>
-            </div>
-            <span className="text-sm text-muted-foreground">Completed</span>
+      {/* Enhanced Call History */}
+      <div className="bg-gradient-to-r from-card to-card/50 border-2 border-secondary/20 rounded-xl p-8 shadow-lg">
+        <div className="flex items-center gap-4 mb-6">
+          <div className="w-14 h-14 bg-secondary/20 rounded-full flex items-center justify-center">
+            <svg className="w-7 h-7 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
           </div>
-          <div className="flex items-center justify-between py-2">
+          <h3 className="text-2xl font-bold text-foreground">Recent Call History</h3>
+        </div>
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-gradient-to-r from-secondary/5 to-secondary/10 border border-secondary/20 rounded-xl">
             <div>
-              <p className="font-medium text-foreground">Dr. James Wilson</p>
-              <p className="text-sm text-muted-foreground">Jan 8, 2024 • 30 minutes</p>
+              <p className="text-lg font-bold text-foreground">Dr. Emily Rodriguez</p>
+              <p className="text-base text-muted-foreground">Jan 10, 2024 • 25 minutes</p>
             </div>
-            <span className="text-sm text-muted-foreground">Completed</span>
+            <span className="text-base font-bold text-green-600 bg-green-100 px-4 py-2 rounded-full border border-green-300 mt-2 sm:mt-0 self-start sm:self-center">
+              Completed
+            </span>
+          </div>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-gradient-to-r from-secondary/5 to-secondary/10 border border-secondary/20 rounded-xl">
+            <div>
+              <p className="text-lg font-bold text-foreground">Dr. James Wilson</p>
+              <p className="text-base text-muted-foreground">Jan 8, 2024 • 30 minutes</p>
+            </div>
+            <span className="text-base font-bold text-green-600 bg-green-100 px-4 py-2 rounded-full border border-green-300 mt-2 sm:mt-0 self-start sm:self-center">
+              Completed
+            </span>
           </div>
         </div>
       </div>

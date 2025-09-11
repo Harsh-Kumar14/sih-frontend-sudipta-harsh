@@ -199,55 +199,87 @@ export default function DoctorsSection() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Search and Filter */}
-      <div className="bg-card border border-border rounded-lg p-6">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1">
-            <label htmlFor="search" className="block text-sm font-medium text-foreground mb-2">
-              Search Doctors
-            </label>
-            <input
-              id="search"
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search by name or specialization..."
-              className="w-full px-3 py-2 border border-border rounded-md bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-            />
+    <div className="space-y-8">
+      {/* Enhanced Header Section */}
+      <div className="bg-gradient-to-r from-primary/10 to-secondary/10 border-2 border-primary/20 rounded-xl p-8 shadow-lg">
+        <div className="flex items-center gap-4 mb-6">
+          <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center">
+            <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
           </div>
           <div>
-            <label htmlFor="specialization" className="block text-sm font-medium text-foreground mb-2">
-              Specialization
-            </label>
-            <select
-              id="specialization"
-              value={selectedSpecialization}
-              onChange={(e) => setSelectedSpecialization(e.target.value)}
-              className="px-3 py-2 border border-border rounded-md bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-            >
-              {specializations.map((spec) => (
-                <option key={spec} value={spec}>
-                  {spec === "all" ? "All Specializations" : spec}
-                </option>
-              ))}
-            </select>
+            <h2 className="text-3xl font-bold text-foreground mb-2">Find Your Doctor</h2>
+            <p className="text-lg text-muted-foreground">Search and connect with qualified healthcare professionals</p>
+          </div>
+        </div>
+
+        {/* Enhanced Search and Filter */}
+        <div className="bg-card border-2 border-border rounded-xl p-6 shadow-sm">
+          <div className="flex flex-col lg:flex-row gap-6">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center">
+                  <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                <label htmlFor="search" className="text-lg font-bold text-foreground">
+                  Search Doctors
+                </label>
+              </div>
+              <input
+                id="search"
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search by name or specialization..."
+                className="w-full px-4 py-3 border-2 border-border rounded-xl bg-input text-foreground text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary shadow-sm"
+              />
+            </div>
+            <div>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-secondary/20 rounded-full flex items-center justify-center">
+                  <svg className="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  </svg>
+                </div>
+                <label htmlFor="specialization" className="text-lg font-bold text-foreground">
+                  Specialization
+                </label>
+              </div>
+              <select
+                id="specialization"
+                value={selectedSpecialization}
+                onChange={(e) => setSelectedSpecialization(e.target.value)}
+                className="px-4 py-3 border-2 border-border rounded-xl bg-input text-foreground text-base focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary shadow-sm"
+              >
+                {specializations.map((spec) => (
+                  <option key={spec} value={spec}>
+                    {spec === "all" ? "All Specializations" : spec}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Loading State */}
+      {/* Enhanced Loading State */}
       {loading && (
-        <div className="text-center py-12">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          <p className="text-muted-foreground mt-2">Loading doctors...</p>
+        <div className="text-center py-16">
+          <div className="bg-gradient-to-r from-card to-card/50 border-2 border-primary/20 rounded-xl p-12 shadow-lg max-w-md mx-auto">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent mb-4"></div>
+            <p className="text-lg font-bold text-muted-foreground">Loading doctors...</p>
+            <p className="text-base text-muted-foreground mt-2">Please wait while we fetch the best doctors for you</p>
+          </div>
         </div>
       )}
 
-      {/* Error State */}
+      {/* Enhanced Error State */}
       {error && !loading && (
-        <div className="text-center py-12">
-          <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-6 max-w-md mx-auto">
+        <div className="text-center py-16">
+          <div className="bg-gradient-to-r from-red-50 to-pink-50 border-2 border-red-300 rounded-xl p-8 max-w-md mx-auto shadow-lg">
             <p className="text-destructive font-medium">⚠️ {error}</p>
             <button
               onClick={() => window.location.reload()}
@@ -259,33 +291,35 @@ export default function DoctorsSection() {
         </div>
       )}
 
-      {/* Doctors List */}
+      {/* Enhanced Doctors List */}
       {!loading && !error && (
-        <div className="grid gap-6">
+        <div className="grid gap-8">
           {filteredDoctors.map((doctor) => (
-          <div key={doctor.id || doctor._id} className="bg-card border border-border rounded-lg p-6">
-            <div className="flex flex-col md:flex-row gap-6">
-              <div className="flex-shrink-0">
-                <img
-                  src={doctor.image || "/placeholder.svg"}
-                  alt={doctor.name}
-                  className="w-20 h-20 rounded-full object-cover"
-                />
+          <div key={doctor.id || doctor._id} className="bg-gradient-to-r from-card to-card/50 border-2 border-primary/20 rounded-xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
+            <div className="flex flex-col lg:flex-row gap-8">
+              <div className="flex-shrink-0 mx-auto lg:mx-0">
+                <div className="relative">
+                  <img
+                    src={doctor.image || "/placeholder.svg"}
+                    alt={doctor.name}
+                    className="w-32 h-32 rounded-full object-cover border-4 border-primary/20 shadow-lg"
+                  />
+                  <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 border-4 border-white rounded-full"></div>
+                </div>
               </div>
 
-              <div className="flex-1">
-                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+              <div className="flex-1 text-center lg:text-left">
+                <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
                   <div>
-                    <h3 className="text-xl font-semibold text-foreground">{doctor.name}</h3>
-                    <p className="text-secondary font-medium">{doctor.specialization}</p>
-                    <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <svg className="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                    <h3 className="text-2xl font-bold text-foreground mb-2">{doctor.name}</h3>
+                    <p className="text-xl text-secondary font-bold mb-4">{doctor.specialization}</p>
+                    <div className="flex items-center justify-center lg:justify-start gap-6 text-base text-muted-foreground">
+                      <div className="flex items-center gap-2 bg-yellow-50 px-3 py-1 rounded-full border border-yellow-200">
+                        <svg className="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
                           <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                         </svg>
-                        <span>{doctor.rating}</span>
+                        <span className="font-bold text-yellow-700">{doctor.rating}</span>
                       </div>
-                      <span>•</span>
                       <span>{doctor.experience} experience</span>
                     </div>
                     <p className="text-sm text-muted-foreground mt-1">{doctor.location}</p>
@@ -295,7 +329,18 @@ export default function DoctorsSection() {
                   </div>
 
                   <div className="text-right">
-                    <p className="text-lg font-semibold text-foreground">{doctor.consultationFee}</p>
+                    <p className="text-lg font-semibold text-foreground">
+                      {doctor.consultationFee ? 
+                        (doctor.consultationFee.toString().startsWith('$') ? 
+                          doctor.consultationFee.replace('$', '₹') : 
+                          (doctor.consultationFee.toString().includes('₹') ? 
+                            doctor.consultationFee : 
+                            `₹${doctor.consultationFee}`
+                          )
+                        ) : 
+                        '₹500'
+                      }
+                    </p>
                     <p className="text-sm text-muted-foreground">Consultation Fee</p>
                     <p
                       className={`text-sm font-medium mt-2 ${
@@ -307,30 +352,35 @@ export default function DoctorsSection() {
                   </div>
                 </div>
 
-                <div className="flex gap-3 mt-4">
+                <div className="flex flex-col sm:flex-row gap-4 mt-6">
                   <button
                     onClick={() => handleBookAppointment(doctor)}
                     disabled={!doctor.licenseNumber}
-                    className={`px-4 py-2 rounded-md font-medium transition-colors ${
+                    className={`px-6 py-3 rounded-xl font-bold text-lg transition-all duration-300 flex items-center justify-center gap-3 ${
                       doctor.licenseNumber 
-                        ? 'bg-primary text-primary-foreground hover:bg-primary/90' 
+                        ? 'bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:shadow-lg hover:scale-105' 
                         : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     }`}
                     title={!doctor.licenseNumber ? 'Doctor license number not available' : 'Book appointment'}
                   >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
                     {doctor.licenseNumber ? 'Book Appointment' : 'Unavailable'}
                   </button>
-                  <button className="border border-border text-foreground px-4 py-2 rounded-md font-medium hover:bg-muted transition-colors">
+                  
+                  <button className="border-2 border-border text-foreground px-6 py-3 rounded-xl font-bold text-lg hover:bg-gradient-to-r hover:from-muted/50 hover:to-muted/30 transition-all duration-300 hover:shadow-md hover:scale-105 flex items-center justify-center gap-3">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
                     View Profile
                   </button>
-
-                  
                   
                   <button
                     onClick={() => handleStartChat(doctor)}
-                    className="bg-secondary text-secondary-foreground px-4 py-2 rounded-md font-medium hover:bg-secondary/90 transition-colors flex items-center gap-2"
+                    className="bg-gradient-to-r from-secondary to-secondary/80 text-secondary-foreground px-6 py-3 rounded-xl font-bold text-lg hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center justify-center gap-3"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -349,8 +399,16 @@ export default function DoctorsSection() {
       )}
 
       {!loading && !error && filteredDoctors.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">No doctors found matching your criteria.</p>
+        <div className="text-center py-16">
+          <div className="bg-gradient-to-r from-card to-card/50 border-2 border-border rounded-xl p-12 shadow-lg max-w-md mx-auto">
+            <div className="w-16 h-16 bg-muted/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <p className="text-xl font-bold text-muted-foreground mb-2">No doctors found</p>
+            <p className="text-base text-muted-foreground">Try adjusting your search criteria or browse all doctors.</p>
+          </div>
         </div>
       )}
 

@@ -380,7 +380,7 @@ export default function InventoryManagement() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Total Value</p>
-              <p className="text-2xl font-bold text-primary">${inventoryStats.totalValue.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-primary">₹{inventoryStats.totalValue.toLocaleString()}</p>
             </div>
             <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
               <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -530,7 +530,7 @@ export default function InventoryManagement() {
                     </div>
                     <div>
                       <p className="text-muted-foreground">Price</p>
-                      <p className="font-medium text-foreground">${item.price}</p>
+                      <p className="font-medium text-foreground">₹{item.price}</p>
                     </div>
                     <div>
                       <p className="text-muted-foreground">Supplier</p>
@@ -546,7 +546,7 @@ export default function InventoryManagement() {
                     </div>
                     <div>
                       <p className="text-muted-foreground">Total Value</p>
-                      <p className="font-medium text-foreground">${(item.currentStock * item.price).toFixed(2)}</p>
+                      <p className="font-medium text-foreground">₹{(item.currentStock * item.price).toFixed(2)}</p>
                     </div>
                   </div>
                 </div>
@@ -622,7 +622,7 @@ export default function InventoryManagement() {
                 {/* Price */}
                 <div>
                   <label htmlFor="add-price" className="block text-sm font-medium text-foreground mb-1">
-                    Price ($) *
+                    Price (₹) *
                   </label>
                   <input
                     type="number"
@@ -635,7 +635,7 @@ export default function InventoryManagement() {
                     className={`w-full px-3 py-2 border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary ${
                       errors.price ? 'border-red-500' : 'border-border'
                     }`}
-                    placeholder="e.g., 15.99"
+                    placeholder="e.g., 299.99"
                   />
                   {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price}</p>}
                 </div>
@@ -805,7 +805,7 @@ export default function InventoryManagement() {
                 {/* Price */}
                 <div>
                   <label htmlFor="edit-price" className="block text-sm font-medium text-foreground mb-1">
-                    Price ($) *
+                    Price (₹) *
                   </label>
                   <input
                     type="number"
@@ -818,7 +818,7 @@ export default function InventoryManagement() {
                     className={`w-full px-3 py-2 border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary ${
                       errors.price ? 'border-red-500' : 'border-border'
                     }`}
-                    placeholder="e.g., 15.99"
+                    placeholder="e.g., 299.99"
                   />
                   {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price}</p>}
                 </div>

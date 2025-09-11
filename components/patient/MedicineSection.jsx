@@ -12,7 +12,7 @@ export default function MedicineSection() {
       name: "Lisinopril 10mg",
       category: "Cardiovascular",
       description: "ACE inhibitor for high blood pressure",
-      price: "$15.99",
+      price: "₹299.99",
       availability: "In Stock",
       pharmacies: [
         { name: "CVS Pharmacy", distance: "0.5 miles", stock: "Available" },
@@ -25,7 +25,7 @@ export default function MedicineSection() {
       name: "Metformin 500mg",
       category: "Diabetes",
       description: "Type 2 diabetes medication",
-      price: "$12.50",
+      price: "₹250.00",
       availability: "In Stock",
       pharmacies: [
         { name: "CVS Pharmacy", distance: "0.5 miles", stock: "Available" },
@@ -37,7 +37,7 @@ export default function MedicineSection() {
       name: "Ibuprofen 200mg",
       category: "Pain Relief",
       description: "Anti-inflammatory pain reliever",
-      price: "$8.99",
+      price: "₹179.99",
       availability: "In Stock",
       pharmacies: [
         { name: "Walgreens", distance: "0.8 miles", stock: "Available" },
@@ -50,7 +50,7 @@ export default function MedicineSection() {
       name: "Amoxicillin 500mg",
       category: "Antibiotics",
       description: "Antibiotic for bacterial infections",
-      price: "$18.75",
+      price: "₹375.00",
       availability: "Limited Stock",
       pharmacies: [
         { name: "CVS Pharmacy", distance: "0.5 miles", stock: "Low Stock" },
@@ -74,59 +74,88 @@ export default function MedicineSection() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Search and Filter */}
-      <div className="bg-card border border-border rounded-lg p-6">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1">
-            <label htmlFor="search" className="block text-sm font-medium text-foreground mb-2">
-              Search Medicines
-            </label>
-            <input
-              id="search"
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search by medicine name or description..."
-              className="w-full px-3 py-2 border border-border rounded-md bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-            />
+    <div className="space-y-8">
+      {/* Enhanced Header Section */}
+      <div className="bg-gradient-to-r from-primary/10 to-secondary/10 border-2 border-primary/20 rounded-xl p-8 shadow-lg">
+        <div className="flex items-center gap-4 mb-6">
+          <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center">
+            <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+            </svg>
           </div>
           <div>
-            <label htmlFor="category" className="block text-sm font-medium text-foreground mb-2">
-              Category
-            </label>
-            <select
-              id="category"
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-3 py-2 border border-border rounded-md bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-            >
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category === "all" ? "All Categories" : category}
-                </option>
-              ))}
-            </select>
+            <h2 className="text-3xl font-bold text-foreground mb-2">Find Your Medicine</h2>
+            <p className="text-lg text-muted-foreground">Search for medicines and locate nearby pharmacies</p>
+          </div>
+        </div>
+
+        {/* Enhanced Search and Filter */}
+        <div className="bg-card border-2 border-border rounded-xl p-6 shadow-sm">
+          <div className="flex flex-col lg:flex-row gap-6">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center">
+                  <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                <label htmlFor="search" className="text-lg font-bold text-foreground">
+                  Search Medicines
+                </label>
+              </div>
+              <input
+                id="search"
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search by medicine name or description..."
+                className="w-full px-4 py-3 border-2 border-border rounded-xl bg-input text-foreground text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary shadow-sm"
+              />
+            </div>
+            <div>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-secondary/20 rounded-full flex items-center justify-center">
+                  <svg className="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  </svg>
+                </div>
+                <label htmlFor="category" className="text-lg font-bold text-foreground">
+                  Category
+                </label>
+              </div>
+              <select
+                id="category"
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="px-4 py-3 border-2 border-border rounded-xl bg-input text-foreground text-base focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary shadow-sm"
+              >
+                {categories.map((category) => (
+                  <option key={category} value={category}>
+                    {category === "all" ? "All Categories" : category}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Medicines List */}
-      <div className="grid gap-6">
+      {/* Enhanced Medicines List */}
+      <div className="grid gap-8">
         {filteredMedicines.map((medicine) => (
-          <div key={medicine.id} className="bg-card border border-border rounded-lg p-6">
-            <div className="flex flex-col lg:flex-row gap-6">
+          <div key={medicine.id} className="bg-gradient-to-r from-card to-card/50 border-2 border-primary/20 rounded-xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
+            <div className="flex flex-col lg:flex-row gap-8">
               <div className="flex-1">
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h3 className="text-xl font-semibold text-foreground">{medicine.name}</h3>
-                    <p className="text-secondary font-medium">{medicine.category}</p>
-                    <p className="text-muted-foreground mt-1">{medicine.description}</p>
+                <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between mb-6">
+                  <div className="text-center lg:text-left">
+                    <h3 className="text-2xl font-bold text-foreground mb-2">{medicine.name}</h3>
+                    <p className="text-xl text-secondary font-bold mb-2">{medicine.category}</p>
+                    <p className="text-base text-muted-foreground">{medicine.description}</p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-lg font-semibold text-foreground">{medicine.price}</p>
+                  <div className="text-center lg:text-right mt-4 lg:mt-0">
+                    <p className="text-3xl font-bold text-primary mb-2">{medicine.price}</p>
                     <span
-                      className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                      className={`inline-block px-4 py-2 rounded-full text-sm font-bold border-2 ${
                         medicine.availability === "In Stock"
                           ? "bg-primary/10 text-primary"
                           : "bg-yellow-100 text-yellow-800"
@@ -137,40 +166,37 @@ export default function MedicineSection() {
                   </div>
                 </div>
 
-                {/* Pharmacy Availability */}
-                <div>
-                  <h4 className="font-medium text-foreground mb-3">Available at nearby pharmacies:</h4>
-                  <div className="space-y-3">
+                {/* Enhanced Pharmacy Availability */}
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center">
+                      <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    </div>
+                    <h4 className="text-lg font-bold text-foreground">Available at nearby pharmacies:</h4>
+                  </div>
+                  <div className="space-y-4">
                     {medicine.pharmacies.map((pharmacy, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center">
-                            <svg className="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                              />
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                              />
+                      <div key={index} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-white border border-green-200 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
+                        <div className="flex items-center space-x-4 mb-3 sm:mb-0">
+                          <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center">
+                            <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
                             </svg>
                           </div>
                           <div>
-                            <p className="font-medium text-foreground">{pharmacy.name}</p>
-                            <p className="text-sm text-muted-foreground">{pharmacy.distance}</p>
+                            <p className="text-lg font-bold text-foreground">{pharmacy.name}</p>
+                            <p className="text-base text-muted-foreground">{pharmacy.distance}</p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-4">
                           <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            className={`px-4 py-2 rounded-full text-sm font-bold border-2 ${
                               pharmacy.stock === "Available"
-                                ? "bg-primary/10 text-primary"
-                                : "bg-yellow-100 text-yellow-800"
+                                ? "bg-green-100 text-green-700 border-green-300"
+                                : "bg-yellow-100 text-yellow-700 border-yellow-300"
                             }`}
                           >
                             {pharmacy.stock}
@@ -178,7 +204,7 @@ export default function MedicineSection() {
                           <button
                             onClick={() => handleReserve(medicine, pharmacy)}
                             disabled={pharmacy.stock === "Out of Stock"}
-                            className="bg-primary text-primary-foreground px-3 py-1 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground px-6 py-2 rounded-xl text-base font-bold hover:shadow-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             Reserve
                           </button>
@@ -194,30 +220,38 @@ export default function MedicineSection() {
       </div>
 
       {filteredMedicines.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">No medicines found matching your criteria.</p>
+        <div className="text-center py-16">
+          <div className="bg-gradient-to-r from-card to-card/50 border-2 border-border rounded-xl p-12 shadow-lg max-w-md mx-auto">
+            <div className="w-16 h-16 bg-muted/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <p className="text-xl font-bold text-muted-foreground mb-2">No medicines found</p>
+            <p className="text-base text-muted-foreground">Try adjusting your search criteria or browse all categories.</p>
+          </div>
         </div>
       )}
 
-      {/* Emergency Contact */}
-      <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-6">
-        <div className="flex items-start gap-4">
-          <div className="w-8 h-8 bg-destructive/20 rounded-full flex items-center justify-center flex-shrink-0">
-            <svg className="w-4 h-4 text-destructive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      {/* Enhanced Emergency Contact */}
+      <div className="bg-gradient-to-r from-red-50 to-pink-50 border-2 border-red-300 rounded-xl p-8 shadow-lg">
+        <div className="flex items-start gap-6">
+          <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth={2}
+                strokeWidth={3}
                 d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
               />
             </svg>
           </div>
           <div>
-            <h4 className="font-medium text-destructive mb-2">Emergency Medicine Needs?</h4>
-            <p className="text-sm text-muted-foreground mb-3">
+            <h4 className="text-2xl font-bold text-red-800 mb-3">Emergency Medicine Needs?</h4>
+            <p className="text-lg text-red-700 mb-6">
               If you need urgent medication, contact your doctor immediately or call emergency services.
             </p>
-            <button className="bg-destructive text-destructive-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-destructive/90 transition-colors">
+            <button className="bg-gradient-to-r from-red-600 to-red-500 text-white px-8 py-4 rounded-xl text-lg font-bold hover:shadow-lg transition-all duration-300 hover:scale-105">
               Emergency Contact
             </button>
           </div>
