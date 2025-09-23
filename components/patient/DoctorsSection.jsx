@@ -26,7 +26,7 @@ export default function DoctorsSection() {
     const fetchDoctors = async () => {
       try {
         setLoading(true)
-        const response = await fetch('http://localhost:8080/get-doctors')
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080'}/get-doctors`)
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`)
         }
@@ -115,7 +115,7 @@ export default function DoctorsSection() {
       console.log('Sending appointment data:', appointmentData)
 
       // Send POST request to backend
-      const response = await axios.post('http://localhost:8080/book-consultation', appointmentData, {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080'}/book-consultation`, appointmentData, {
         headers: {
           'Content-Type': 'application/json'
         }

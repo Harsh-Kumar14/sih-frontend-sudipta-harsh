@@ -34,7 +34,7 @@ export default function DoctorDashboard() {
     }
 
     // Fallback: fetch doctor details from backend
-    fetch(`http://localhost:8080/doctor/${doctorId}`)
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080'}/doctor/${doctorId}`)
       .then(res => res.ok ? res.json() : null)
       .then(data => {
         if (data && data.doctor) {

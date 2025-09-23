@@ -37,7 +37,7 @@ export default function ProviderAuth({ userType }) {
     try {
       if (isLogin) {
         // Doctor sign-in using /doctor-signin
-        const response = await fetch("http://localhost:8080/doctor-signin", {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080'}/doctor-signin`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -74,7 +74,7 @@ export default function ProviderAuth({ userType }) {
             availability: formData.availability,
             password: formData.password
           };
-          const response = await fetch("http://localhost:8080/add-doctor", {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080'}/add-doctor`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(doctorData)
@@ -88,7 +88,7 @@ export default function ProviderAuth({ userType }) {
             localStorage.setItem("userId", `${userType}_${Date.now()}`);
             // Fetch doctor details and store
             try {
-              const res = await fetch(`http://localhost:8080/doctor/${doctorId}`);
+              const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080'}/doctor/${doctorId}`);
               if (res.ok) {
                 const docData = await res.json();
                 if (docData && docData.doctor) {

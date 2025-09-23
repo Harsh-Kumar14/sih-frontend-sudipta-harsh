@@ -60,7 +60,7 @@ export default function PatientAuth() {
       }
 
       // Check if user exists in database
-      const response = await axios.get('http://localhost:8080/get-users')
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080'}/get-users`)
       const users = response.data // Direct array from the endpoint
 
       // Find user by contact number
@@ -243,7 +243,7 @@ export default function PatientAuth() {
       console.log('Sending user data:', userData)
 
       // Make API call to backend
-      const response = await axios.post('http://localhost:8080/add-user', userData, {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080'}/add-user`, userData, {
         headers: {
           'Content-Type': 'application/json'
         }

@@ -53,7 +53,7 @@ export default function PatientQueue() {
         console.log('Fetching consultations for doctor ID:', doctorId)
         
         // Fetch doctor consultations from your backend
-        const response = await fetch(`http://localhost:8080/doctor-consultations/${doctorId}`)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080'}/doctor-consultations/${doctorId}`)
         
         if (response.ok) {
           const data = await response.json()
@@ -271,7 +271,7 @@ export default function PatientQueue() {
       
       if (!patientId && prescriptionPatient.phone) {
         try {
-          const patientResponse = await fetch('http://localhost:8080/patientId', {
+          const patientResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080'}/patientId`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -303,7 +303,7 @@ export default function PatientQueue() {
       }))
 
       // Send prescription to backend
-      const response = await fetch(`http://localhost:8080/prescribe-multiple-medicines/${patientId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080'}/prescribe-multiple-medicines/${patientId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

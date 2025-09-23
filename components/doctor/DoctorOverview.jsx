@@ -30,7 +30,7 @@ export default function DoctorOverview({ user }) {
       console.log('Fetching consultations for doctor ID:', doctorId)
       
       // Fetch doctor consultations from your backend
-      const response = await fetch(`http://localhost:8080/doctor-consultations/${doctorId}`)
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080'}/doctor-consultations/${doctorId}`)
       
       if (response.ok) {
         const consultationsData = await response.json()

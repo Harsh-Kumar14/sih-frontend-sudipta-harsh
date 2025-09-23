@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 
 // API base URL for the pharmacy backend
-const API_BASE_URL = 'http://localhost:8000/api/medicines'
+const API_BASE_URL = `${process.env.NEXT_PUBLIC_PHARMACY_API_URL || 'http://localhost:8000'}/api/medicines`
 
 export default function InventoryManagement() {
   const [searchTerm, setSearchTerm] = useState("")
