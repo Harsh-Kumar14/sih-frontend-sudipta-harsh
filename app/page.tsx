@@ -9,7 +9,7 @@ export default function LandingPage() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <h1 className="text-2xl font-bold text-primary">HealthCare+</h1>
+                <h1 className="text-2xl font-bold text-primary">Jeevan Setu</h1>
               </div>
             </div>
             <nav className="flex space-x-8">
@@ -149,7 +149,7 @@ export default function LandingPage() {
       <section className="py-20 bg-muted">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Why Choose HealthCare+?</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Why Choose Jeevan Setu?</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Our platform brings together all aspects of healthcare management in one secure, easy-to-use solution.
             </p>
@@ -224,7 +224,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-lg font-semibold text-foreground mb-4">HealthCare+</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-4">Jeevan Setu</h3>
               <p className="text-muted-foreground">
                 Connecting healthcare providers and patients through innovative technology.
               </p>
@@ -291,7 +291,7 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="border-t border-border mt-8 pt-8 text-center text-sm text-muted-foreground">
-            <p>&copy; 2024 HealthCare+. All rights reserved.</p>
+            <p>&copy; 2025 Jeevan Setu. All rights reserved.</p>
           </div>
         </div>
       </footer>

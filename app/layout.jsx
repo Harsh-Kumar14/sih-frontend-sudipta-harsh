@@ -5,9 +5,8 @@ import { Suspense } from "react"
 import "./globals.css"
 
 export const metadata = {
-  title: "HealthCare+ | Complete Healthcare Solution",
+  title: "Jeevan Setu | Complete Healthcare Solution",
   description: "Connect patients, doctors, and pharmacies in one comprehensive healthcare platform",
-  generator: "v0.app",
 }
 
 export default function RootLayout({ children }) {

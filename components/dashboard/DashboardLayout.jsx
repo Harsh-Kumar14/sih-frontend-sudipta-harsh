@@ -195,7 +195,7 @@ export default function DashboardLayout({
         {/* Logo */}
         <div className="p-6 border-b border-border">
           <Link href="/" className="text-xl font-bold text-primary">
-            HealthCare+
+          Jeevan Setu
           </Link>
         </div>
 
